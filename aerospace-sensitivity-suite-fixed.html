@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aerospace Sensitivity Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#08090d;--bg2:#0e1018;--bg3:#141720;--bg4:#1a1f2e;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8eaf0;--text2:#9da5bc;--text3:#5a6480;--amber:#f5a623;--amber2:#ffc95c;--amberbg:rgba(245,166,35,0.08);--red:#e84444;--redbg:rgba(232,68,68,0.08);--green:#3ddc97;--greenbg:rgba(61,220,151,0.08);--blue:#4d9fff;--bluebg:rgba(77,159,255,0.08);--cyan:#00d4ff;--font:'Syne',sans-serif;--mono:'Space Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+.hero{background:linear-gradient(135deg,#0a0d15 0%,#0f1320 50%,#0d1018 100%);border-bottom:1px solid var(--border2);overflow:hidden;position:relative}
+.hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(77,159,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(77,159,255,0.04) 1px,transparent 1px);background-size:40px 40px}
+.hero-glow{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:800px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(245,166,35,0.06) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:1280px;margin:0 auto;padding:4rem 3rem 3rem;display:grid;grid-template-columns:1fr auto;align-items:end;gap:3rem;position:relative}
+@media(max-width:800px){.hero-inner{grid-template-columns:1fr;padding:2rem 1.5rem}}
+.hero-label{font-family:var(--mono);font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--amber);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.hero-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--amber)}
+.hero h1{font-size:clamp(32px,5vw,72px);font-weight:800;line-height:1.0;letter-spacing:-.03em}
+.hero h1 em{font-style:normal;color:var(--amber)}
+.hero h1 span{color:var(--cyan)}
+.hero-sub{margin-top:1rem;color:var(--text2);max-width:580px;font-family:var(--mono);font-size:12px;line-height:1.8}
+.module-badges{display:flex;flex-direction:column;gap:.5rem;align-items:flex-end}
+@media(max-width:800px){.module-badges{flex-direction:row;flex-wrap:wrap;align-items:flex-start}}
+.mbadge{font-family:var(--mono);font-size:9px;letter-spacing:.12em;border:1px solid var(--border2);padding:5px 12px;color:var(--text3);white-space:nowrap}
+.mbadge.active{border-color:var(--amber);color:var(--amber)}
+.module-nav{background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.module-nav-inner{max-width:1280px;margin:0 auto;padding:0 3rem;display:flex;overflow-x:auto}
+@media(max-width:800px){.module-nav-inner{padding:0 1rem}}
+.mnav-btn{padding:1rem 1.5rem;background:transparent;border:none;font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--text3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.mnav-btn:hover{color:var(--text2)}
+.mnav-btn.active{color:var(--amber);border-bottom-color:var(--amber)}
+.main{max-width:1280px;margin:0 auto;padding:2.5rem 3rem 5rem}
+@media(max-width:800px){.main{padding:1.5rem 1.5rem 4rem}}
+.module{display:none}
+.module.active{display:block}
+.sec-title{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.sec-title-line{flex:1;height:1px;background:var(--border)}
+.sec-title-text{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:1.5rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1.5rem}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1.5rem}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}.g4,.g5{grid-template-columns:repeat(2,1fr)}}
+.panel{background:var(--bg2);border:1px solid var(--border);padding:1.5rem}
+.panel-title{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+.stat-cell{background:var(--bg2);padding:1.25rem 1.5rem}
+.stat-num{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--amber);line-height:1}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5}
+.stat-src{font-family:var(--mono);font-size:9px;color:var(--border2);margin-top:3px}
+label{font-size:11px;color:var(--text2);display:block;margin-bottom:5px;font-family:var(--mono)}
+select{width:100%;padding:8px 12px;border:1px solid var(--border2);background:var(--bg3);font-family:var(--font);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+select:focus{border-color:var(--amber)}
+.form-row{margin-bottom:1rem}
+.range-row{display:flex;align-items:center;gap:10px}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:2px;outline:none;cursor:pointer;background:linear-gradient(to right,var(--amber) var(--pct,50%),var(--bg4) var(--pct,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--amber);cursor:pointer;border-radius:50%;border:2px solid var(--bg)}
+input[type=range].hl{background:linear-gradient(to right,var(--red) 0%,var(--red) var(--pct,50%),var(--bg4) var(--pct,50%))}
+input[type=range].hl::-webkit-slider-thumb{background:var(--red)}
+.range-val{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--amber);min-width:55px;text-align:right}
+.rc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1.5rem}
+@media(max-width:700px){.rc-grid{grid-template-columns:1fr}}
+.rc{background:var(--bg2);padding:1.1rem 1.25rem}
+.rc-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.4rem}
+.rc-val{font-family:var(--mono);font-size:26px;font-weight:700;transition:color .3s}
+.rc-val.high{color:var(--red)}.rc-val.med{color:var(--amber)}.rc-val.low{color:var(--green)}
+.rc-sub{font-size:10px;color:var(--text3);margin-top:3px}
+.rbar{margin-bottom:1rem}
+.rbar-top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:4px}
+.rbar-track{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.rbar-fill{height:100%;transition:width .5s ease,background .4s;border-radius:3px}
+.strat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--border);margin-bottom:1.5rem}
+.sg{background:var(--bg2);padding:1.25rem 1.5rem}
+.sg-rank{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.4rem}
+.sg-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.4rem}
+.sg-eff{font-family:var(--mono);font-size:12px;font-weight:700}
+.sg-eff.high{color:var(--green)}.sg-eff.med{color:var(--amber)}.sg-eff.low{color:var(--red)}
+.sg-desc{font-size:11px;color:var(--text2);margin-top:.4rem;line-height:1.7}
+.sg-src{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:.4rem}
+.tbl-wrap{overflow-x:auto;margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--bg4);color:var(--text2);padding:.6rem .8rem;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border2)}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:.5rem .8rem;color:var(--text2);vertical-align:top}
+tbody td:first-child{font-weight:600;color:var(--text);font-family:var(--mono);font-size:11px}
+.badge{display:inline-block;padding:2px 7px;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.05em}
+.b-err{background:var(--redbg);color:var(--red);border:1px solid rgba(232,68,68,.3)}
+.b-sil{background:var(--bluebg);color:var(--blue);border:1px solid rgba(77,159,255,.3)}
+.b-yes{background:var(--greenbg);color:var(--green)}
+.b-no{background:var(--bg4);color:var(--text3)}
+.b-code{background:var(--amberbg);color:var(--amber)}
+.b-data{background:var(--bluebg);color:var(--blue)}
+.b-sens{background:var(--redbg);color:var(--red)}
+.b-cmd{background:var(--bg4);color:var(--text3)}
+.tbl-filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem}
+.tf{padding:5px 10px;border:1px solid var(--border);background:transparent;font-family:var(--mono);font-size:10px;cursor:pointer;color:var(--text3);transition:all .15s}
+.tf.active{background:var(--amber);color:var(--bg);border-color:var(--amber)}
+.search-wrap{display:flex;gap:.5rem;margin-bottom:.75rem}
+.search-wrap input{flex:1;padding:8px 12px;border:1px solid var(--border);background:var(--bg3);font-family:var(--font);font-size:12px;color:var(--text);outline:none}
+.search-wrap input:focus{border-color:var(--amber)}
+.cfrp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:1.5rem}
+@media(max-width:700px){.cfrp-grid{grid-template-columns:1fr}}
+.cfrp-cell{background:var(--bg2);padding:1.1rem 1.25rem}
+.cfrp-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.4rem}
+.cfrp-val{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--green)}
+.cfrp-bar-t{height:4px;background:var(--bg4);margin-top:.5rem;overflow:hidden}
+.cfrp-bar-f{height:100%;transition:width .6s ease}
+.chart-h{position:relative;height:200px}
+.chart-h-tall{position:relative;height:250px}
+.bosor-grid{display:grid;grid-template-columns:300px 1fr;gap:1.5rem;margin-bottom:1.5rem}
+@media(max-width:900px){.bosor-grid{grid-template-columns:1fr}}
+.ms-table{width:100%;margin-bottom:1rem}
+.ms-table td{padding:.5rem .6rem;font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--border)}
+.ms-table td:first-child{color:var(--text2)}
+.ms-table td:last-child{text-align:right;font-weight:700}
+.verdict-box{padding:.75rem 1rem;font-size:12px;line-height:1.7;margin-top:.75rem}
+.verdict-pass{background:var(--greenbg);border-left:3px solid var(--green)}
+.verdict-fail{background:var(--redbg);border-left:3px solid var(--red)}
+.incident-box{border-left:3px solid var(--red);background:var(--redbg);padding:1.25rem 1.5rem;margin-bottom:1.5rem}
+.incident-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--red);text-transform:uppercase;margin-bottom:.5rem}
+.incident-title{font-size:18px;font-weight:700;margin-bottom:.5rem}
+.incident-body{font-size:12px;line-height:1.9;color:var(--text2)}
+.incident-body strong{color:var(--text)}
+.case-nav{display:flex;gap:0;margin-bottom:2rem;border:1px solid var(--border2);overflow:hidden}
+.case-btn{flex:1;padding:10px 8px;background:transparent;border:none;border-right:1px solid var(--border);cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--text3);text-align:center;line-height:1.4;transition:all .2s}
+.case-btn:last-child{border-right:none}
+.case-btn.active{background:var(--amber);color:var(--bg);font-weight:700}
+.case-num{font-size:9px;display:block;opacity:.6;margin-bottom:2px}
+.case-panel{display:none}
+.case-panel.active{display:block}
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1.5rem;overflow:hidden}
+@media(max-width:700px){.metrics-row{grid-template-columns:repeat(2,1fr)}}
+.m-cell{background:var(--bg2);padding:1rem 1.1rem}
+.m-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.m-num{font-family:var(--mono);font-size:26px;font-weight:700;transition:color .3s}
+.m-num.safe{color:var(--green)}.m-num.warn{color:var(--amber)}.m-num.danger{color:var(--red)}
+.m-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.status-track{height:4px;background:var(--bg4);margin:.75rem 0;overflow:hidden}
+.status-fill{height:100%;transition:width .4s,background .4s}
+.heal-box{border:1px solid;padding:1.1rem 1.4rem;margin-bottom:1.5rem;display:none}
+.heal-box.active{display:block;animation:slidein .25s ease}
+@keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.heal-box.unsafe{border-color:var(--red);background:var(--redbg)}
+.heal-box.healing{border-color:var(--amber);background:var(--amberbg)}
+.heal-box.healed{border-color:var(--green);background:var(--greenbg)}
+.heal-badge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;display:inline-block;margin-bottom:.5rem}
+.unsafe .heal-badge{background:var(--red);color:var(--bg)}
+.healing .heal-badge{background:var(--amber);color:var(--bg)}
+.healed .heal-badge{background:var(--green);color:var(--bg)}
+.heal-title-t{font-size:15px;font-weight:700;margin-bottom:.4rem}
+.unsafe .heal-title-t{color:var(--red)}.healing .heal-title-t{color:var(--amber)}.healed .heal-title-t{color:var(--green)}
+.heal-list{list-style:none;font-size:11px;line-height:2.1;color:var(--text2);font-family:var(--mono)}
+.heal-list li::before{content:'→ ';color:var(--text3)}
+.heal-btn{margin-top:.75rem;padding:7px 16px;border:1px solid;background:transparent;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;transition:all .18s}
+.heal-btn.apply{border-color:var(--amber);color:var(--amber)}
+.heal-btn.apply:hover{background:var(--amber);color:var(--bg)}
+.heal-btn.reset-btn{border-color:var(--green);color:var(--green)}
+.heal-btn.reset-btn:hover{background:var(--green);color:var(--bg)}
+.sens-row{display:flex;align-items:center;gap:10px;margin:.4rem 0}
+.sens-lbl{min-width:160px;font-family:var(--mono);font-size:10px;color:var(--text2);text-align:right}
+.sens-track{flex:1;height:12px;background:var(--bg4);border:1px solid var(--border);overflow:hidden}
+.sens-fill{height:100%;transition:width .5s ease}
+.sens-val{min-width:50px;font-family:var(--mono);font-size:10px;font-weight:600}
+.data-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:1rem}
+.data-table th{text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border2);padding:.4rem .6rem}
+.data-table td{padding:.5rem .6rem;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.data-table tr.highlight td{background:var(--redbg)}
+.data-table .val{font-weight:600;color:var(--text)}
+.data-table .actual{color:var(--red);font-weight:600}
+.data-table .safe-t{color:var(--green);font-weight:600}
+.data-table .warn-t{color:var(--amber);font-weight:600}
+.ctrl-row{margin-bottom:1rem}
+.ctrl-top{display:flex;justify-content:space-between;margin-bottom:4px}
+.ctrl-name{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.ctrl-val{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--amber)}
+.timeline{position:relative;padding-left:2rem;margin-bottom:2rem}
+.timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--border2)}
+.tl-item{position:relative;margin-bottom:1.25rem}
+.tl-dot{position:absolute;left:-2rem;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--text3);background:var(--bg2)}
+.tl-dot.red{border-color:var(--red);background:var(--red)}
+.tl-year{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--amber);margin-bottom:2px}
+.tl-text{font-size:12px;line-height:1.7;color:var(--text2)}
+.tl-text strong{color:var(--text)}
+.findings-box{background:var(--bg3);border:1px solid var(--border2);padding:2rem;margin-bottom:2rem}
+.findings-title{font-size:18px;font-weight:700;color:var(--amber);margin-bottom:1.5rem;font-style:italic}
+.findings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+@media(max-width:700px){.findings-grid{grid-template-columns:1fr}}
+.finding-num{font-size:42px;font-weight:800;color:var(--text3);line-height:1;opacity:.3}
+.finding-text{font-size:11px;line-height:1.8;color:var(--text2);margin-top:.3rem}
+.citation{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:.75rem;line-height:1.7;border-top:1px solid var(--border);padding-top:.5rem}
+.footer{border-top:1px solid var(--border);padding:2rem 3rem;max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-family:var(--mono);font-size:10px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-label">Structural Instability &amp; Sensitivity Analysis · Team Project</div>
+      <h1>Aerospace<br><em>Sensitivity</em><br><span>Suite</span></h1>
+      <div class="hero-sub">Three integrated modules: Software error risk calculator with self-healing CFRP recovery · Lockheed BOSOR-style buckling analysis with Monte Carlo margins · Real failure data from Aloha 243, NASA flutter tests, and F-16 stability.</div>
+    </div>
+    <div class="module-badges">
+      <div class="mbadge active">Module 01 · Error Calculator &amp; Self-Healing</div>
+      <div class="mbadge">Module 02 · BOSOR Buckling Analysis</div>
+      <div class="mbadge">Module 03 · Real Failure Data Integration</div>
+      <div class="mbadge">Prokop 2024 · Bond et al. 2007 · NTSB · NASA SP-8007</div>
+    </div>
+  </div>
+</div>
+
+<div class="module-nav">
+  <div class="module-nav-inner">
+    <button class="mnav-btn active" onclick="switchModule('m1',this)">01 · Error Calculator &amp; Self-Healing</button>
+    <button class="mnav-btn" onclick="switchModule('m2',this)">02 · BOSOR Buckling (Lockheed)</button>
+    <button class="mnav-btn" onclick="switchModule('m3',this)">03 · Real Failure Data</button>
+    <button class="mnav-btn" onclick="switchModule('m4',this)">04 · 3D Viz &amp; Crack Propagation</button>
+    <button class="mnav-btn" onclick="switchModule('m5',this)">05 · AI Design Assistant</button>
+    <button class="mnav-btn" onclick="switchModule('m6',this)">06 · Failure Mode Matrix</button>
+    <button class="mnav-btn" onclick="switchModule('m7',this)">07 · Eigenvalue Tracker</button>
+    <button class="mnav-btn" onclick="switchModule('m8',this)">08 · Sensitivity Dashboard</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- MODULE 1 -->
+<div class="module active" id="m1">
+  <div class="g5" style="margin-top:.5rem">
+    <div class="stat-cell"><div class="stat-num">85%</div><div class="stat-lbl">Produce erroneous output (not crash)</div><div class="stat-src">Table 3 · Prokop 2024</div></div>
+    <div class="stat-cell"><div class="stat-num">2%</div><div class="stat-lbl">Erroneous errors fixed by reboot</div><div class="stat-src">Table 4 · Prokop 2024</div></div>
+    <div class="stat-cell"><div class="stat-num">40%</div><div class="stat-lbl">Caused by absence of code</div><div class="stat-src">Table 5 · Prokop 2024</div></div>
+    <div class="stat-cell"><div class="stat-num">58%</div><div class="stat-lbl">Error in code / logic layer</div><div class="stat-src">Table 6 · Prokop 2024</div></div>
+    <div class="stat-cell"><div class="stat-num">92%</div><div class="stat-lbl">CFRP strength after self-healing</div><div class="stat-src">Table 2 · Bond et al.</div></div>
+  </div>
+
+  <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Software Error Risk Calculator</div><div class="sec-title-line"></div></div>
+  <div class="g2">
+    <div class="panel">
+      <div class="panel-title">System Profile Inputs</div>
+      <div class="form-row"><label>System type</label>
+        <select id="sys-type" onchange="calculate()">
+          <option value="spacecraft">Spacecraft (56% of dataset)</option>
+          <option value="launch">Launch vehicle (15%)</option>
+          <option value="aircraft">Aircraft (15%)</option>
+          <option value="missile">Missile (4%)</option>
+        </select></div>
+      <div class="form-row"><label>Error location</label>
+        <select id="err-loc" onchange="calculate()">
+          <option value="code">Code / Logic / Algorithm (58%)</option>
+          <option value="data">Data misconfiguration (16%)</option>
+          <option value="sensor">Sensor input – unanticipated (15%)</option>
+          <option value="command">Command / operator input (11%)</option>
+        </select></div>
+      <div class="form-row"><label>Mission phase</label>
+        <select id="phase" onchange="calculate()">
+          <option value="launch">Launch / ascent</option>
+          <option value="cruise">Cruise / on-orbit</option>
+          <option value="entry">Entry / landing / descent</option>
+          <option value="ground">Ground operations</option>
+        </select></div>
+      <div class="form-row"><label>Software test coverage (%)</label>
+        <div class="range-row">
+          <input type="range" id="test-cov" min="0" max="100" value="70" oninput="setR(this);calculate()">
+          <span class="range-val" id="tcov-val">70%</span>
+        </div></div>
+      <div class="form-row"><label>Backup / redundancy</label>
+        <select id="backup" onchange="calculate()">
+          <option value="none">No backup system</option>
+          <option value="watchdog">Watchdog timer only</option>
+          <option value="dissimilar">Dissimilar software backup</option>
+          <option value="manual">Manual override available</option>
+          <option value="full">Full N-version + manual</option>
+        </select></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Error Probability Outputs</div>
+      <div class="rc-grid">
+        <div class="rc"><div class="rc-lbl">Erroneous output risk</div><div class="rc-val" id="r-err">--</div><div class="rc-sub">wrong output (not crash)</div></div>
+        <div class="rc"><div class="rc-lbl">Fail-silent risk</div><div class="rc-val" id="r-sil">--</div><div class="rc-sub">crash / no output</div></div>
+        <div class="rc"><div class="rc-lbl">Missing code risk</div><div class="rc-val" id="r-miss">--</div><div class="rc-sub">unknown-unknown prob.</div></div>
+      </div>
+      <div class="rbar"><div class="rbar-top"><span>Overall failure risk</span><span id="rb-pct">--</span></div><div class="rbar-track"><div class="rbar-fill" id="rb-fill"></div></div></div>
+      <div class="rbar"><div class="rbar-top"><span>Reboot recovery probability</span><span id="rb-reboot">--</span></div><div class="rbar-track"><div class="rbar-fill" id="rb-reboot-fill" style="background:var(--blue)"></div></div></div>
+      <div class="rbar"><div class="rbar-top"><span>Risk after best countermeasure</span><span id="rb-after">--</span></div><div class="rbar-track"><div class="rbar-fill" id="rb-after-fill" style="background:var(--green)"></div></div></div>
+      <div style="margin-top:1rem;background:var(--bg3);padding:.75rem 1rem;border-left:2px solid var(--amber)">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:.4rem">Historical match</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.7" id="hist-match">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Recommended Strategies</div><div class="sec-title-line"></div></div>
+  <div class="strat-grid" id="strategy-grid"></div>
+
+  <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">CFRP Self-Healing Calculator — Bond et al. 2007</div><div class="sec-title-line"></div></div>
+  <div class="g2">
+    <div class="panel">
+      <div class="panel-title">HGF Configuration</div>
+      <div class="form-row"><label>HGF fibre pitch spacing (μm)</label>
+        <select id="hgf-pitch" onchange="calcCFRP()">
+          <option value="70">70μm — adjacent fibres (3% Vf)</option>
+          <option value="140">140μm — 2× diameter spacing (2% Vf)</option>
+          <option value="200" selected>200μm — 3× diameter spacing (1% Vf)</option>
+          <option value="opt">Optimised 5-interface 70+140μm (6% Vf)</option>
+        </select></div>
+      <div class="form-row"><label>Test type</label>
+        <select id="test-type" onchange="calcCFRP()">
+          <option value="flex">Four-point bend (flexural strength)</option>
+          <option value="cai">Compression after impact (CAI)</option>
+        </select></div>
+      <div class="form-row"><label>Impact energy (J)</label>
+        <div class="range-row">
+          <input type="range" id="impact-e" min="1" max="6" value="3" step="0.5" oninput="setR(this);calcCFRP()">
+          <span class="range-val" id="ie-val">3.0 J</span>
+        </div></div>
+      <div class="form-row"><label>Healing temperature (°C)</label>
+        <div class="range-row">
+          <input type="range" id="heal-temp" min="20" max="150" value="125" step="5" oninput="setR(this);calcCFRP()">
+          <span class="range-val" id="ht-val">125°C</span>
+        </div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Predicted Strength Recovery</div>
+      <div class="cfrp-grid">
+        <div class="cfrp-cell"><div class="cfrp-lbl">Undamaged strength</div><div class="cfrp-val" id="cf-und">--</div><div class="cfrp-bar-t"><div class="cfrp-bar-f" id="cf-und-bar" style="background:var(--blue)"></div></div></div>
+        <div class="cfrp-cell"><div class="cfrp-lbl">Post-impact residual</div><div class="cfrp-val" id="cf-dam" style="color:var(--red)">--</div><div class="cfrp-bar-t"><div class="cfrp-bar-f" id="cf-dam-bar" style="background:var(--red)"></div></div></div>
+        <div class="cfrp-cell"><div class="cfrp-lbl">After self-healing</div><div class="cfrp-val" id="cf-heal">--</div><div class="cfrp-bar-t"><div class="cfrp-bar-f" id="cf-heal-bar" style="background:var(--green)"></div></div></div>
+      </div>
+      <div style="background:var(--greenbg);padding:.75rem 1rem;border-left:2px solid var(--green);margin-top:1rem">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:.4rem">Self-healing verdict</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.7" id="cf-verdict">—</div>
+      </div>
+      <div style="background:var(--amberbg);padding:.7rem 1rem;border-left:2px solid var(--amber);margin-top:.75rem;font-size:11px;color:var(--text2)">
+        <strong>Mechanism:</strong> Resin-filled HGFs (60μm Ø, 50% hollowness) rupture on impact, releasing Cycom 823 epoxy into the damage network. Healing agent infiltrates delaminations and cures at elevated temperature, restoring compressive load paths.
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Statistical Breakdown — 55 Aerospace Software Incidents</div><div class="sec-title-line"></div></div>
+  <div class="g3">
+    <div class="panel"><div class="panel-title">Manifestation type</div><div class="chart-h"><canvas id="c1"></canvas></div></div>
+    <div class="panel"><div class="panel-title">Error location distribution</div><div class="chart-h"><canvas id="c2"></canvas></div></div>
+    <div class="panel"><div class="panel-title">CFRP strength recovery</div><div class="chart-h"><canvas id="c3"></canvas></div></div>
+  </div>
+
+  <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Incident Database — All 55 Cases (Prokop 2024)</div><div class="sec-title-line"></div></div>
+  <div class="search-wrap"><input type="text" id="tbl-search" placeholder="Search system name, year, error type…" oninput="filterTable()"></div>
+  <div class="tbl-filters">
+    <button class="tf active" onclick="filterBy('all',this)">All (55)</button>
+    <button class="tf" onclick="filterBy('erroneous',this)">Erroneous (47)</button>
+    <button class="tf" onclick="filterBy('fail-silent',this)">Fail-silent (8)</button>
+    <button class="tf" onclick="filterBy('missing',this)">Missing code (22)</button>
+    <button class="tf" onclick="filterBy('code',this)">Code/logic</button>
+    <button class="tf" onclick="filterBy('sensor',this)">Sensor</button>
+    <button class="tf" onclick="filterBy('data',this)">Data</button>
+  </div>
+  <div class="tbl-wrap">
+    <table><thead><tr>
+      <th>#</th><th>Year</th><th>System</th><th>Manifestation</th>
+      <th>Reboot fixes?</th><th>Missing code?</th><th>Error location</th><th>Unknown-unknown?</th>
+    </tr></thead><tbody id="tbl-body"></tbody></table>
+  </div>
+</div>
+
+<!-- MODULE 2 -->
+<div class="module" id="m2">
+  <div style="background:var(--bg3);border:1px solid var(--border2);padding:1.25rem 1.5rem;margin-bottom:1.5rem;border-left:3px solid var(--blue)">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--blue);text-transform:uppercase;margin-bottom:.4rem">Lockheed BOSOR · Bushnell 1976 + NASA SP-8007</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:.4rem">Aerospace Buckling Analysis with KDF &amp; Monte Carlo Margins</div>
+    <div style="font-size:11px;color:var(--text2);line-height:1.7">Classical shell/column buckling → Knockdown Factor (KDF) for real imperfect structures → Margin of Safety → interaction equations for combined loading → Monte Carlo sensitivity on manufacturing tolerances.</div>
+  </div>
+  <div class="bosor-grid">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Structure &amp; Material</div>
+        <div class="form-row"><label>Structure type</label>
+          <select id="b-struct" onchange="runBOSOR()">
+            <option value="column">Column / Strut</option>
+            <option value="panel">Flat Panel (wing/fuselage skin)</option>
+            <option value="cylinder" selected>Cylinder Shell (rocket/fuselage barrel)</option>
+          </select></div>
+        <div class="form-row"><label>Material</label>
+          <select id="b-mat" onchange="runBOSOR()">
+            <option value="al2024">Al 2024-T3 — E=73 GPa, fy=345 MPa</option>
+            <option value="al7075" selected>Al 7075-T6 — E=71.7 GPa, fy=503 MPa</option>
+            <option value="ti6al4v">Ti-6Al-4V — E=114 GPa, fy=880 MPa</option>
+            <option value="steel4130">Alloy Steel 4130 — E=200 GPa, fy=435 MPa</option>
+            <option value="cfrp">CFRP Unidirectional — E=135 GPa, fy=1500 MPa</option>
+          </select></div>
+        <div class="form-row"><label>Applied load (kN)</label>
+          <div class="range-row"><input type="range" id="b-load" min="1" max="2000" step="5" value="500" oninput="setR(this);runBOSOR()"><span class="range-val" id="b-load-v">500</span></div></div>
+        <div class="form-row"><label>Length L (m)</label>
+          <div class="range-row"><input type="range" id="b-L" min="0.5" max="10" step="0.1" value="3.0" oninput="setR(this);runBOSOR()"><span class="range-val" id="b-L-v">3.0</span></div></div>
+        <div class="form-row"><label>Radius / width R (m)</label>
+          <div class="range-row"><input type="range" id="b-R" min="0.05" max="3" step="0.05" value="1.85" oninput="setR(this);runBOSOR()"><span class="range-val" id="b-R-v">1.85</span></div></div>
+        <div class="form-row"><label>Wall thickness t (mm)</label>
+          <div class="range-row"><input type="range" id="b-t" min="1" max="20" step="0.5" value="4" oninput="setR(this);runBOSOR()"><span class="range-val" id="b-t-v">4.0</span></div></div>
+        <div class="form-row"><label>Boundary conditions</label>
+          <select id="b-bc" onchange="runBOSOR()">
+            <option value="pin_pin" selected>Pin-Pin (K=1.0)</option>
+            <option value="fixed_fixed">Fixed-Fixed (K=0.5)</option>
+            <option value="fixed_pin">Fixed-Pin (K=0.7)</option>
+            <option value="fixed_free">Fixed-Free / Cantilever (K=2.0)</option>
+          </select></div>
+        <div class="form-row"><label>Stiffeners (count)</label>
+          <div class="range-row"><input type="range" id="b-ns" min="0" max="24" step="1" value="12" oninput="setR(this);runBOSOR()"><span class="range-val" id="b-ns-v">12</span></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="g4" style="margin-bottom:1.5rem">
+        <div class="stat-cell"><div class="stat-num" id="b-pcr">—</div><div class="stat-lbl">P_cr KDF-corrected (kN)</div></div>
+        <div class="stat-cell"><div class="stat-num" id="b-kdf">—</div><div class="stat-lbl">Knockdown Factor</div></div>
+        <div class="stat-cell"><div class="stat-num" id="b-ms">—</div><div class="stat-lbl">Margin of Safety</div></div>
+        <div class="stat-cell"><div class="stat-num" id="b-beta">—</div><div class="stat-lbl">Reliability index β</div></div>
+      </div>
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-title">Margins — Lockheed Format</div>
+          <table class="ms-table">
+            <tr><td>MS buckling (vs applied)</td><td id="b-ms1">—</td></tr>
+            <tr><td>MS buckling (vs ultimate)</td><td id="b-ms2">—</td></tr>
+            <tr><td>MS yield (vs applied)</td><td id="b-ms3">—</td></tr>
+            <tr><td>MS interaction (NASA SP-8007)</td><td id="b-ms4">—</td></tr>
+            <tr><td>Reserve factor RF</td><td id="b-rf">—</td></tr>
+            <tr><td>Compression ratio Rc</td><td id="b-rc">—</td></tr>
+          </table>
+          <div class="verdict-box" id="b-verdict-box">
+            <strong id="b-verdict">Calculating…</strong>
+            <div id="b-recs" style="margin-top:.5rem;font-size:11px;color:var(--text2);line-height:1.8"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Monte Carlo — Manufacturing Tolerances (N=1000)</div>
+          <div class="chart-h"><canvas id="b-mc-chart"></canvas></div>
+          <div style="margin-top:.5rem;font-family:var(--mono);font-size:10px;color:var(--text3)">CoV: E=3%, t=4%, L=0.5%, R=0.3%, Load=8%</div>
+          <div style="margin-top:.5rem" id="b-mc-stats"></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="panel"><div class="panel-title">P_cr vs Wall Thickness Sweep</div><div class="chart-h"><canvas id="b-thick-chart"></canvas></div></div>
+        <div class="panel"><div class="panel-title">NASA SP-8007 KDF Curve (Cylinder)</div><div class="chart-h"><canvas id="b-kdf-chart"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 3 -->
+<div class="module" id="m3">
+  <div class="findings-box">
+    <div class="findings-title">"Every accident is a sensitivity analysis that no one ran."</div>
+    <div class="findings-grid">
+      <div><div class="finding-num">89,680</div><div class="finding-text">Pressurisation cycles on Aloha 737-200 N73711 — over twice the original design life.</div></div>
+      <div><div class="finding-num">3–5%</div><div class="finding-text">Damping identification error that shifts flutter speed prediction by up to 5% — per NASA Langley aeroelastic research.</div></div>
+      <div><div class="finding-num">MS = 0</div><div class="finding-text">The margin of safety at lap joint S-10L on the day of the Aloha accident.</div></div>
+    </div>
+  </div>
+  <div class="case-nav">
+    <button class="case-btn active" onclick="switchCase(0)"><span class="case-num">CASE A</span>ALOHA 243<br>Structural Failure</button>
+    <button class="case-btn" onclick="switchCase(1)"><span class="case-num">CASE B</span>NASA LANGLEY<br>Flutter Boundary</button>
+    <button class="case-btn" onclick="switchCase(2)"><span class="case-num">CASE C</span>F-16 STABILITY<br>Derivative Sensitivity</button>
+  </div>
+
+  <!-- CASE A -->
+  <div class="case-panel active" id="case-0">
+    <div class="incident-box">
+      <div class="incident-tag">NTSB/AAR-89/03 · April 28 1988 · Boeing 737-200 N73711</div>
+      <div class="incident-title">Aloha Airlines Flight 243 — Fuselage Structural Failure at 24,000 ft</div>
+      <div class="incident-body"><strong>What happened:</strong> After 89,680 pressurisation cycles, fatigue cracks at lap joint stringer S-10L linked up. The upper fuselage skin separated — approximately 18 feet torn away. The failure initiated exactly where the structural margin of safety had silently reached zero.<br><br><strong>The sensitivity connection:</strong> Small changes in crack density, corrosion rate, and inspection threshold drove enormous changes in residual structural strength — the real-world equivalent of structural sensitivity analysis.</div>
+    </div>
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-title">Real NTSB Data — Structural Parameters at Failure</div>
+        <table class="data-table">
+          <thead><tr><th>Parameter</th><th>Design spec</th><th>At accident</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr class="highlight"><td>Flight cycles</td><td class="val">~40,000</td><td class="actual">89,680</td><td class="actual">224% over</td></tr>
+            <tr><td>Aircraft age</td><td class="val">15 yr design</td><td class="actual">19 years</td><td class="actual">+4 yrs</td></tr>
+            <tr><td>Lap joint condition</td><td class="val">Bonded intact</td><td class="actual">Fully disbonded</td><td class="actual">FAILED</td></tr>
+            <tr><td>Structural margin MS</td><td class="val">&gt; 0.20</td><td class="actual">≈ 0 or negative</td><td class="actual">ZERO</td></tr>
+            <tr><td>Environment</td><td class="val">Standard</td><td class="warn-t">Coastal salt/humid</td><td class="warn-t">Accelerated</td></tr>
+          </tbody>
+        </table>
+        <div class="citation">Source: NTSB Aircraft Accident Report AAR-89/03, 1989.</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Fatigue Degradation — Cycles vs. Residual Strength</div>
+        <div class="chart-h-tall"><canvas id="alohaChart"></canvas></div>
+        <div class="citation">Modelled from NTSB fatigue analysis. Corrosion-accelerated curve based on coastal environment data.</div>
+      </div>
+    </div>
+    <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Live Sensitivity Model — Aloha Parameters</div><div class="sec-title-line"></div></div>
+    <div class="metrics-row">
+      <div class="m-cell"><div class="m-lbl">Applied stress (MPa)</div><div class="m-num" id="a-app">---</div><div class="m-sub">hoop + bending</div></div>
+      <div class="m-cell"><div class="m-lbl">Residual strength (MPa)</div><div class="m-num" id="a-res">---</div></div>
+      <div class="m-cell"><div class="m-lbl">Margin of safety MS</div><div class="m-num" id="a-ms">---</div><div class="m-sub">certified min = 0.20</div></div>
+      <div class="m-cell"><div class="m-lbl">Failure probability</div><div class="m-num" id="a-fp">---</div><div class="m-sub">per flight cycle</div></div>
+    </div>
+    <div class="status-track"><div class="status-fill" id="a-sbar"></div></div>
+    <div id="a-heal" class="heal-box"></div>
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-title">Structural Parameter Controls</div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Flight cycles accumulated (×10³)</span><span class="ctrl-val" id="a-cyc-v">40</span></div><input type="range" id="a-cyc" min="5" max="100" step="1" value="40" oninput="setR(this);updateAloha()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Corrosion factor (1=none, 3=severe)</span><span class="ctrl-val" id="a-cor-v">1.2</span></div><input type="range" id="a-cor" min="1" max="3" step="0.05" value="1.2" oninput="setR(this);updateAloha()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Crack density (cracks/rivet row)</span><span class="ctrl-val" id="a-crd-v">0</span></div><input type="range" id="a-crd" min="0" max="20" step="0.5" value="0" oninput="setR(this);updateAloha()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Cabin pressure ΔP (psi)</span><span class="ctrl-val" id="a-prs-v">8.6</span></div><input type="range" id="a-prs" min="5" max="12" step="0.1" value="8.6" oninput="setR(this);updateAloha()"></div>
+        <div class="ctrl-row" style="margin-bottom:0"><div class="ctrl-top"><span class="ctrl-name">Inspection sensitivity (0=blind, 1=perfect)</span><span class="ctrl-val" id="a-ins-v">0.60</span></div><input type="range" id="a-ins" min="0" max="1" step="0.02" value="0.60" oninput="setR(this);updateAloha()"></div>
+      </div>
+      <div class="panel"><div class="panel-title">Sensitivity Tornado — ΔMS per ±10% Parameter Change</div><div id="a-tornado" style="margin-top:.5rem"></div></div>
+    </div>
+    <div class="sec-title" style="margin-top:1.5rem"><div class="sec-title-line"></div><div class="sec-title-text">Key Events Timeline</div><div class="sec-title-line"></div></div>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">1969</div><div class="tl-text">Boeing 737-200 N73711 manufactured. Design fatigue life: <strong>~40,000 flight cycles</strong>.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">1972</div><div class="tl-text">Boeing Service Bulletin 737-53-1039 issued addressing <strong>lap joint corrosion</strong>. FAA never made it mandatory.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">1987</div><div class="tl-text">Aircraft reaches ~75,000 cycles. FAA upgrades SB to alert status. <strong>Aloha does not fully comply.</strong></div></div>
+      <div class="tl-item"><div class="tl-dot red"></div><div class="tl-year">Apr 28, 1988</div><div class="tl-text"><strong>Failure at 89,680 cycles.</strong> 18 feet of fuselage separates at 24,000 ft. MS had reached zero. One fatality.</div></div>
+    </div>
+  </div>
+
+  <!-- CASE B -->
+  <div class="case-panel" id="case-1">
+    <div class="incident-box" style="border-color:var(--blue);background:var(--bluebg)">
+      <div class="incident-tag" style="color:var(--blue)">NASA LANGLEY · NTRS-20100016275 · Aerostructures Test Wing</div>
+      <div class="incident-title">NASA Langley Flutter Sensitivity — Damping Uncertainty Study</div>
+      <div class="incident-body"><strong>The NASA finding:</strong> Damping identification errors of just 3–5% in ground vibration testing shift flutter speed predictions by 3–5% (FRVF method) or up to 5% (Loewner Framework). In a fighter aircraft flying at 400 m/s, a 5% error means the actual flutter boundary is <strong>20 m/s closer than the pilot believes.</strong></div>
+    </div>
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-title">NASA ATW Measured Data</div>
+        <table class="data-table">
+          <thead><tr><th>Parameter</th><th>Nominal</th><th>±Uncertainty</th><th>Flutter ΔV</th></tr></thead>
+          <tbody>
+            <tr class="highlight"><td>Damping ratio ζ</td><td class="val">1.5%</td><td class="actual">±0.05–0.075%</td><td class="actual">−3% to −5%</td></tr>
+            <tr><td>Torsional stiffness GJ</td><td class="val">GJ_nominal</td><td class="warn-t">±8–12%</td><td class="warn-t">±4–6%</td></tr>
+            <tr><td>Mass ratio μ</td><td class="val">μ_nominal</td><td class="val">±5%</td><td class="val">±2.5%</td></tr>
+            <tr><td>Bending stiffness EI</td><td class="val">EI_nominal</td><td class="val">±6%</td><td class="val">±1.8%</td></tr>
+            <tr><td>Flutter speed (Langley)</td><td class="val">Measured V_f</td><td class="safe-t">±3% (FRVF)</td><td class="safe-t">Best method</td></tr>
+          </tbody>
+        </table>
+        <div class="citation">Source: NASA/NTRS-20100016275; arXiv:2503.04433 Damping Sensitivity in Flutter.</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Flutter Boundary Uncertainty — Damping Error Envelope</div>
+        <div class="chart-h-tall"><canvas id="nasaChart"></canvas></div>
+        <div class="citation">Modelled from NASA NTRS flutter uncertainty study. Band = ±3% (FRVF) to ±5% (LF) prediction error.</div>
+      </div>
+    </div>
+    <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Live Flutter Simulator — NASA ATW Data Loaded</div><div class="sec-title-line"></div></div>
+    <div class="metrics-row">
+      <div class="m-cell"><div class="m-lbl">Predicted V_flutter</div><div class="m-num" id="n-vf">---</div></div>
+      <div class="m-cell"><div class="m-lbl">True V_flutter (±noise)</div><div class="m-num" id="n-tvf">---</div></div>
+      <div class="m-cell"><div class="m-lbl">Flutter index FI</div><div class="m-num" id="n-fi">---</div></div>
+      <div class="m-cell"><div class="m-lbl">Safety verdict</div><div class="m-num" id="n-ver">---</div></div>
+    </div>
+    <div class="status-track"><div class="status-fill" id="n-sbar"></div></div>
+    <div id="n-heal" class="heal-box"></div>
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-title">Parameters — NASA ATW Baseline</div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Bending stiffness EI (×10⁶ N·m²)</span><span class="ctrl-val" id="n-ei-v">8.5</span></div><input type="range" id="n-ei" min="1" max="20" step="0.5" value="8.5" oninput="setR(this);updateNasa()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Torsional stiffness GJ (×10⁶ N·m²)</span><span class="ctrl-val" id="n-gj-v">5.2</span></div><input type="range" id="n-gj" min="1" max="15" step="0.5" value="5.2" oninput="setR(this);updateNasa()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Mass ratio μ</span><span class="ctrl-val" id="n-mu-v">18</span></div><input type="range" id="n-mu" min="5" max="50" step="1" value="18" oninput="setR(this);updateNasa()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Airspeed V (m/s)</span><span class="ctrl-val" id="n-va-v">160</span></div><input type="range" id="n-va" min="50" max="400" step="5" value="160" oninput="setR(this);updateNasa()"></div>
+        <div class="ctrl-row" style="margin-bottom:0"><div class="ctrl-top"><span class="ctrl-name">GVT damping error δ_ζ (%)</span><span class="ctrl-val" id="n-de-v">3.0</span></div><input type="range" id="n-de" min="0" max="10" step="0.1" value="3" oninput="setR(this);updateNasa()"></div>
+      </div>
+      <div class="panel"><div class="panel-title">Flutter Index Sensitivity Tornado</div><div id="n-tornado" style="margin-top:.5rem"></div></div>
+    </div>
+  </div>
+
+  <!-- CASE C -->
+  <div class="case-panel" id="case-2">
+    <div class="incident-box" style="border-color:var(--green);background:var(--greenbg)">
+      <div class="incident-tag" style="color:var(--green)">FAA / USAF STABILITY DATA · F-16 CG Sensitivity Study</div>
+      <div class="incident-title">F-16 Longitudinal Stability — CG Range and Derivative Sensitivity</div>
+      <div class="incident-body"><strong>The design challenge:</strong> The F-16 was intentionally designed with a slightly unstable longitudinal static margin (SM ≈ −2% to −5%) relying entirely on fly-by-wire. <strong>Any failure in stability augmentation immediately renders the aircraft uncontrollable.</strong> A CG shift of just 2–3% chord aft of the allowable limit causes the aircraft to depart controlled flight.</div>
+    </div>
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-title">F-16 Published Stability Data</div>
+        <table class="data-table">
+          <thead><tr><th>Parameter</th><th>Nominal</th><th>Certified range</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td>Static margin SM</td><td class="actual">−2% to −5%</td><td class="warn-t">±1% c̄ tol.</td><td class="actual">Unstable by design</td></tr>
+            <tr class="highlight"><td>CG aft limit</td><td class="val">35% c̄</td><td class="actual">Hard limit</td><td class="actual">Uncontrollable aft</td></tr>
+            <tr><td>Cm_α (SAS-on)</td><td class="safe-t">Effectively −1.5</td><td class="safe-t">FBW corrects</td><td class="safe-t">Augmented</td></tr>
+            <tr><td>Cm_α (SAS-off)</td><td class="actual">+0.2 to +0.5</td><td class="actual">Unstable</td><td class="actual">Pilot cannot hold</td></tr>
+            <tr><td>NP shift per Mach 0.1</td><td class="val">~1–2% c̄</td><td class="warn-t">Must track</td><td class="warn-t">Compressible</td></tr>
+          </tbody>
+        </table>
+        <div class="citation">Source: General Dynamics F-16 design specs; USAF stability certification; Brandt et al. Aircraft Design.</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">CG Position vs Static Margin — Certified Envelope</div>
+        <div class="chart-h-tall"><canvas id="f16Chart"></canvas></div>
+        <div class="citation">Modelled from published F-16 CG limits and certified SAS-on/off margins.</div>
+      </div>
+    </div>
+    <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Live Stability Analyser — F-16 Data Loaded</div><div class="sec-title-line"></div></div>
+    <div class="metrics-row">
+      <div class="m-cell"><div class="m-lbl">Neutral point x_np/c̄</div><div class="m-num" id="f-xnp">---</div></div>
+      <div class="m-cell"><div class="m-lbl">Static margin SM</div><div class="m-num" id="f-sm">---</div></div>
+      <div class="m-cell"><div class="m-lbl">SAS-off stability</div><div class="m-num" id="f-sas">---</div></div>
+      <div class="m-cell"><div class="m-lbl">Verdict</div><div class="m-num" id="f-ver">---</div></div>
+    </div>
+    <div class="status-track"><div class="status-fill" id="f-sbar"></div></div>
+    <div id="f-heal" class="heal-box"></div>
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-title">Parameters — F-16 Baseline (SAS-on)</div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Cm_α (FBW augmented)</span><span class="ctrl-val" id="f-cma-v">−1.50</span></div><input type="range" id="f-cma" min="-3" max="0.8" step="0.05" value="-1.5" oninput="setR(this);updateF16()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">CL_α (lift slope, /rad)</span><span class="ctrl-val" id="f-cla-v">3.80</span></div><input type="range" id="f-cla" min="1.5" max="8" step="0.1" value="3.8" oninput="setR(this);updateF16()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">CG position x_cg/c̄</span><span class="ctrl-val" id="f-xcg-v">0.32</span></div><input type="range" id="f-xcg" min="0.15" max="0.50" step="0.005" value="0.32" oninput="setR(this);updateF16()"></div>
+        <div class="ctrl-row"><div class="ctrl-top"><span class="ctrl-name">Mach number (NP shift)</span><span class="ctrl-val" id="f-mach-v">0.80</span></div><input type="range" id="f-mach" min="0.3" max="2.0" step="0.05" value="0.8" oninput="setR(this);updateF16()"></div>
+        <div class="ctrl-row" style="margin-bottom:0"><div class="ctrl-top"><span class="ctrl-name">Derivative uncertainty δ (%)</span><span class="ctrl-val" id="f-ns-v">2.0</span></div><input type="range" id="f-ns" min="0" max="12" step="0.5" value="2" oninput="setR(this);updateF16()"></div>
+      </div>
+      <div class="panel"><div class="panel-title">Stability Sensitivity Tornado</div><div id="f-tornado" style="margin-top:.5rem"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 4 -->
+<div class="module" id="m4">
+
+  <div style="background:var(--bg3);border:1px solid var(--border2);padding:1.25rem 1.5rem;margin-bottom:1.5rem;border-left:3px solid var(--cyan)">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--cyan);text-transform:uppercase;margin-bottom:.4rem">Interactive 3D Visualisation · WebGL + Three.js</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:.4rem">3D Buckling Animation &amp; Live Crack Propagation</div>
+    <div style="font-size:11px;color:var(--text2);line-height:1.7">Two real-time simulations: a WebGL cylinder that physically buckles as load exceeds P_cr, with KDF imperfection dimples visible on the surface — and a 2D fuselage cross-section where fatigue cracks nucleate at rivet holes and link up as flight cycles accumulate, replicating the Aloha 243 S-10L failure mechanism.</div>
+  </div>
+
+  <!-- 3D BUCKLING -->
+  <div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">3D Real-Time Buckling Animation — WebGL</div><div class="sec-title-line"></div></div>
+  <div class="g2">
+    <div class="panel" style="padding:1rem">
+      <div class="panel-title">Structure Controls</div>
+      <div class="form-row"><label>Structure type</label>
+        <select id="v3-struct" onchange="update3D()">
+          <option value="cylinder" selected>Cylinder Shell (rocket body)</option>
+          <option value="column">Column / Strut</option>
+          <option value="panel">Flat Panel (wing skin)</option>
+        </select></div>
+      <div class="form-row"><label>Applied load — drag past P_cr to buckle</label>
+        <div class="range-row">
+          <input type="range" id="v3-load" min="0" max="100" step="0.5" value="0" oninput="setR(this);update3D()">
+          <span class="range-val" id="v3-load-v">0%</span>
+        </div></div>
+      <div class="form-row"><label>Imperfection amplitude (KDF effect)</label>
+        <div class="range-row">
+          <input type="range" id="v3-imp" min="0" max="100" step="1" value="20" oninput="setR(this);update3D()">
+          <span class="range-val" id="v3-imp-v">20%</span>
+        </div></div>
+      <div class="form-row"><label>Wall thickness</label>
+        <div class="range-row">
+          <input type="range" id="v3-thick" min="1" max="30" step="1" value="8" oninput="setR(this);update3D()">
+          <span class="range-val" id="v3-thick-v">8</span>
+        </div></div>
+      <div class="form-row" style="margin-bottom:0"><label>Boundary condition</label>
+        <select id="v3-bc" onchange="update3D()">
+          <option value="1.0">Pin-Pin (K=1.0)</option>
+          <option value="0.5">Fixed-Fixed (K=0.5)</option>
+          <option value="2.0">Fixed-Free (K=2.0)</option>
+        </select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:1rem">
+        <div style="background:var(--bg3);padding:.75rem 1rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">P_cr (KDF)</div><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber)" id="v3-pcr">—</div></div>
+        <div style="background:var(--bg3);padding:.75rem 1rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">Load ratio P/P_cr</div><div style="font-family:var(--mono);font-size:20px;font-weight:700" id="v3-ratio">—</div></div>
+        <div style="background:var(--bg3);padding:.75rem 1rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">KDF</div><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--blue)" id="v3-kdf">—</div></div>
+        <div style="background:var(--bg3);padding:.75rem 1rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">Status</div><div style="font-family:var(--mono);font-size:16px;font-weight:700" id="v3-status">—</div></div>
+      </div>
+      <div style="margin-top:.75rem;padding:.7rem 1rem;background:var(--bg3);border-left:2px solid var(--text3);font-size:11px;color:var(--text2);line-height:1.7" id="v3-desc">Drag the load slider to apply axial compression. The structure will deform elastically, then buckle when P/P_cr exceeds 1.0. Imperfection amplitude controls how early the KDF causes deviation from classical theory.</div>
+    </div>
+    <div style="position:relative;background:#050608;border:1px solid var(--border2);overflow:hidden;min-height:500px">
+      <canvas id="three-canvas" style="width:100%;height:500px;display:block"></canvas>
+      <div style="position:absolute;top:12px;left:14px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3);line-height:1.8">
+        DRAG to rotate &nbsp;·&nbsp; SCROLL to zoom<br>
+        <span id="v3-mode-label" style="color:var(--cyan)">MODE: ELASTIC</span>
+      </div>
+      <div style="position:absolute;bottom:12px;right:14px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.2)">WebGL · Three.js r128</div>
+    </div>
+  </div>
+
+  <!-- CRACK PROPAGATION -->
+  <div class="sec-title" style="margin-top:1rem"><div class="sec-title-line"></div><div class="sec-title-text">Live Crack Propagation — Aloha 243 S-10L Joint Simulation</div><div class="sec-title-line"></div></div>
+  <div class="g2">
+    <div class="panel" style="padding:1rem">
+      <div class="panel-title">Fatigue &amp; Environment Controls</div>
+      <div class="form-row"><label>Flight cycles (×10³) — drag to 89.6 to replicate Aloha accident</label>
+        <div class="range-row">
+          <input type="range" id="cp-cyc" min="0" max="100" step="0.5" value="0" oninput="setR(this);updateCracks()">
+          <span class="range-val" id="cp-cyc-v">0k</span>
+        </div></div>
+      <div class="form-row"><label>Corrosion severity (1=none → 3=coastal Aloha)</label>
+        <div class="range-row">
+          <input type="range" id="cp-cor" min="1" max="3" step="0.05" value="1" oninput="setR(this);updateCracks()">
+          <span class="range-val" id="cp-cor-v">1.0</span>
+        </div></div>
+      <div class="form-row"><label>Cabin pressure ΔP (psi)</label>
+        <div class="range-row">
+          <input type="range" id="cp-prs" min="5" max="12" step="0.1" value="8.6" oninput="setR(this);updateCracks()">
+          <span class="range-val" id="cp-prs-v">8.6</span>
+        </div></div>
+      <div class="form-row" style="margin-bottom:0"><label>Inspection quality (0=none → 1=perfect NDT)</label>
+        <div class="range-row">
+          <input type="range" id="cp-ins" min="0" max="1" step="0.02" value="0.6" oninput="setR(this);updateCracks()">
+          <span class="range-val" id="cp-ins-v">0.60</span>
+        </div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:1rem">
+        <div style="background:var(--bg3);padding:.75rem 1rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">Active cracks</div><div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--red)" id="cp-ncrack">0</div></div>
+        <div style="background:var(--bg3);padding:.75rem 1rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">Linked clusters</div><div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--amber)" id="cp-clusters">0</div></div>
+        <div style="background:var(--bg3);padding:.75rem 1rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">Residual MS</div><div style="font-family:var(--mono);font-size:22px;font-weight:700" id="cp-ms">—</div></div>
+      </div>
+      <div style="margin-top:.75rem;padding:.7rem 1rem;font-size:11px;line-height:1.7;border-left:2px solid var(--border2)" id="cp-status-box">Simulation ready. Drag flight cycles to begin crack nucleation at rivet holes.</div>
+      <button onclick="runCrackAnimation()" style="margin-top:.75rem;width:100%;padding:9px;border:1px solid var(--amber);background:transparent;color:var(--amber);font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.05em;transition:all .2s" onmouseover="this.style.background='var(--amber)';this.style.color='#08090d'" onmouseout="this.style.background='transparent';this.style.color='var(--amber)'">▶ ANIMATE TO ALOHA ACCIDENT CONDITIONS</button>
+    </div>
+    <div style="background:#050608;border:1px solid var(--border2);overflow:hidden;position:relative">
+      <canvas id="crack-canvas" style="width:100%;display:block"></canvas>
+      <div style="position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3);line-height:1.8">
+        FUSELAGE CROSS-SECTION · LAP JOINT S-10L<br>
+        <span style="color:var(--red)">● CRACK</span> &nbsp;
+        <span style="color:var(--amber)">● LINKED</span> &nbsp;
+        <span style="color:rgba(255,255,255,0.25)">● RIVET</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /m4 -->
+
+<!-- ═══ MODULE 5: AI DESIGN ASSISTANT ═══ -->
+<div class="module" id="m5">
+<div style="background:var(--bg3);border:1px solid var(--border2);padding:1.25rem 1.5rem;margin-bottom:1.5rem;border-left:3px solid var(--cyan)">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--cyan);text-transform:uppercase;margin-bottom:.4rem">Powered by Claude · Anthropic API</div>
+  <div style="font-size:13px;font-weight:700;margin-bottom:.4rem">AI Structural Engineering Design Assistant</div>
+  <div style="font-size:11px;color:var(--text2);line-height:1.7">Describe your structure, failure scenario, or paste your parameters. Claude will analyse the instability, explain the sensitivity drivers, and produce a formal engineering recommendation with specific redesign steps — referencing BOSOR methodology, NASA SP-8007, and real accident data from this project.</div>
+</div>
+<div class="g2">
+  <div class="panel">
+    <div class="panel-title">Query Input</div>
+    <div class="form-row"><label>Quick scenario presets</label>
+      <select id="ai-preset" onchange="loadPreset()">
+        <option value="">— Select a preset or write your own —</option>
+        <option value="bosor">Analyse my BOSOR cylinder: R=1.85m, t=4mm, L=3m, Al 7075, P=500kN. Is it safe?</option>
+        <option value="aloha">Explain why Aloha 243 failed from a structural sensitivity perspective. What parameters were most critical?</option>
+        <option value="flutter">My wing has GJ=5.2×10⁶ N·m², EI=8.5×10⁶ N·m², flying at 160 m/s. GVT damping error is 3%. Am I safe?</option>
+        <option value="cfrp">My CFRP panel took a 3J impact. I have 200μm HGF fibres. Will self-healing restore enough strength for continued flight?</option>
+        <option value="f16">My aircraft has Cm_α=−1.5, CL_α=3.8, CG at 32% chord. What happens if the FBW fails?</option>
+        <option value="design">Design me the most robust cylindrical shell for a rocket interstage that must carry 800kN with minimum mass.</option>
+      </select></div>
+    <div class="form-row"><label>Your engineering question</label>
+      <textarea id="ai-query" rows="6" style="width:100%;padding:10px 12px;border:1px solid var(--border2);background:var(--bg3);font-family:var(--font);font-size:12px;color:var(--text);outline:none;resize:vertical;line-height:1.7;border-radius:2px" placeholder="Describe your structure, paste parameters, or ask about any failure scenario covered in this project..."></textarea></div>
+    <div class="form-row" style="margin-bottom:0">
+      <label>Analysis depth</label>
+      <select id="ai-depth">
+        <option value="quick">Quick assessment (2-3 paragraphs)</option>
+        <option value="detailed" selected>Detailed engineering analysis</option>
+        <option value="formal">Formal report format with recommendations</option>
+      </select></div>
+    <button onclick="runAI()" id="ai-btn" style="margin-top:1rem;width:100%;padding:11px;border:1px solid var(--cyan);background:transparent;color:var(--cyan);font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.08em;transition:all .2s" onmouseover="this.style.background='var(--cyan)';this.style.color='#08090d'" onmouseout="this.style.background='transparent';this.style.color='var(--cyan)'">▶ RUN AI ANALYSIS</button>
+  </div>
+  <div class="panel" style="display:flex;flex-direction:column">
+    <div class="panel-title">AI Engineering Response <span id="ai-status" style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-left:.5rem"></span></div>
+    <div id="ai-response" style="flex:1;min-height:340px;font-size:12px;line-height:1.9;color:var(--text2);overflow-y:auto;white-space:pre-wrap;font-family:var(--mono);padding:.25rem 0">
+      <span style="color:var(--text3)">AI response will appear here. Ask anything about structural instability, buckling margins, flutter boundaries, CFRP self-healing, or the real accident cases in this project.</span>
+    </div>
+  </div>
+</div>
+<!-- Chat history -->
+<div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Conversation History</div><div class="sec-title-line"></div></div>
+<div id="ai-history" style="display:flex;flex-direction:column;gap:.75rem;max-height:400px;overflow-y:auto"></div>
+<button onclick="clearAIHistory()" style="margin-top:.75rem;padding:6px 14px;border:1px solid var(--border);background:transparent;font-family:var(--mono);font-size:10px;color:var(--text3);cursor:pointer">Clear history</button>
+</div>
+
+<!-- ═══ MODULE 6: FAILURE MODE MATRIX ═══ -->
+<div class="module" id="m6">
+<div style="background:var(--bg3);border:1px solid var(--border2);padding:1.25rem 1.5rem;margin-bottom:1.5rem;border-left:3px solid var(--amber)">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase;margin-bottom:.4rem">Interactive Heatmap · Click any cell for failure detail</div>
+  <div style="font-size:13px;font-weight:700;margin-bottom:.4rem">Failure Mode Matrix — Structure × Loading Condition</div>
+  <div style="font-size:11px;color:var(--text2);line-height:1.7">Each cell shows the margin of safety for that structure-loading combination. Green = safe, amber = marginal, red = failure. Click any cell to see the failure mode description, governing equation, and historical example. Drag the global load multiplier to sweep the entire design space simultaneously.</div>
+</div>
+<div class="g2">
+  <div class="panel">
+    <div class="panel-title">Global Controls</div>
+    <div class="form-row"><label>Global load multiplier</label>
+      <div class="range-row"><input type="range" id="fm-load" min="0.1" max="3" step="0.05" value="1" oninput="setR(this);renderMatrix()"><span class="range-val" id="fm-load-v">1.0×</span></div></div>
+    <div class="form-row"><label>Material family</label>
+      <select id="fm-mat" onchange="renderMatrix()">
+        <option value="al">Aluminium alloys</option>
+        <option value="ti">Titanium alloys</option>
+        <option value="cfrp">CFRP composites</option>
+        <option value="steel">Steel alloys</option>
+      </select></div>
+    <div class="form-row" style="margin-bottom:0"><label>Safety factor</label>
+      <div class="range-row"><input type="range" id="fm-sf" min="1" max="3" step="0.1" value="1.5" oninput="setR(this);renderMatrix()"><span class="range-val" id="fm-sf-v">1.5</span></div></div>
+    <div id="fm-detail" style="margin-top:1rem;background:var(--bg3);padding:1rem;border-left:2px solid var(--amber);min-height:200px;font-size:11px;line-height:1.8;color:var(--text2)">
+      <span style="color:var(--text3)">Click any cell in the matrix to see detailed failure mode analysis.</span>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <canvas id="fm-canvas" style="display:block;cursor:pointer"></canvas>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODULE 7: EIGENVALUE TRACKER ═══ -->
+<div class="module" id="m7">
+<div style="background:var(--bg3);border:1px solid var(--border2);padding:1.25rem 1.5rem;margin-bottom:1.5rem;border-left:3px solid var(--green)">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--green);text-transform:uppercase;margin-bottom:.4rem">Live Eigenvalue Analysis · Structural Stability Theory</div>
+  <div style="font-size:13px;font-weight:700;margin-bottom:.4rem">Real-Time Buckling Eigenvalue Tracker</div>
+  <div style="font-size:11px;color:var(--text2);line-height:1.7">The mathematical definition of structural instability: a buckling eigenvalue λ = P_cr/P_applied → 1.0. Watch the first 5 eigenvalues migrate toward zero as axial load increases. When λ₁ crosses 1.0, the structure is unstable in that mode. The associated mode shape appears in the diagram below — this is exactly what BOSOR computes numerically.</div>
+</div>
+<div class="g2">
+  <div class="panel">
+    <div class="panel-title">Load &amp; Structure Parameters</div>
+    <div class="form-row"><label>Applied load P (% of classical P_cr)</label>
+      <div class="range-row"><input type="range" id="ev-load" min="0" max="130" step="1" value="0" oninput="setR(this);updateEigen()"><span class="range-val" id="ev-load-v">0%</span></div></div>
+    <div class="form-row"><label>Structure type</label>
+      <select id="ev-struct" onchange="updateEigen()">
+        <option value="column">Column (5 Euler modes)</option>
+        <option value="cylinder" selected>Cylinder (circumferential modes)</option>
+        <option value="panel">Panel (m×n half-wave modes)</option>
+      </select></div>
+    <div class="form-row"><label>Imperfection sensitivity</label>
+      <div class="range-row"><input type="range" id="ev-imp" min="0" max="50" step="1" value="15" oninput="setR(this);updateEigen()"><span class="range-val" id="ev-imp-v">15%</span></div></div>
+    <div style="background:var(--bg3);padding:1rem;margin-top:.5rem">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:.5rem;letter-spacing:.1em;text-transform:uppercase">Eigenvalue table</div>
+      <table style="width:100%;font-family:var(--mono);font-size:11px;border-collapse:collapse" id="ev-table"></table>
+    </div>
+    <div style="margin-top:.75rem;padding:.7rem 1rem;background:var(--bg3);border-left:2px solid var(--green);font-size:11px;color:var(--text2);line-height:1.7" id="ev-verdict-box"></div>
+  </div>
+  <div>
+    <div class="panel" style="margin-bottom:1.5rem">
+      <div class="panel-title">Eigenvalue Migration — λ vs Load Ratio P/P_cr</div>
+      <div style="position:relative;height:260px"><canvas id="ev-chart"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Critical Mode Shape — Buckling Deformation Pattern</div>
+      <canvas id="ev-shape" style="width:100%;height:180px;display:block;background:#050608"></canvas>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MODULE 8: SENSITIVITY DASHBOARD + MC STREAMING ═══ -->
+<div class="module" id="m8">
+<div style="background:var(--bg3);border:1px solid var(--border2);padding:1.25rem 1.5rem;margin-bottom:1.5rem;border-left:3px solid var(--blue)">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--blue);text-transform:uppercase;margin-bottom:.4rem">Unified Sensitivity Index · All Case Studies</div>
+  <div style="font-size:13px;font-weight:700;margin-bottom:.4rem">Global Sensitivity Dashboard &amp; Live Monte Carlo Streaming</div>
+  <div style="font-size:11px;color:var(--text2);line-height:1.7">Ranks every parameter across all three case studies by how much a 1% change moves the safety margin — giving a single unified view of what matters most across the entire project. Below: watch 1000 Monte Carlo samples stream in live, with the failure tail turning red as it fills.</div>
+</div>
+<!-- Sensitivity ranking -->
+<div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Global Parameter Sensitivity Index — All Cases Ranked</div><div class="sec-title-line"></div></div>
+<div id="si-bars" style="margin-bottom:2rem"></div>
+<!-- MC streaming -->
+<div class="sec-title"><div class="sec-title-line"></div><div class="sec-title-text">Live Monte Carlo Streaming — 1000 Samples</div><div class="sec-title-line"></div></div>
+<div class="g2">
+  <div class="panel">
+    <div class="panel-title">Streaming Controls</div>
+    <div class="form-row"><label>Case study</label>
+      <select id="mc-case" onchange="resetMC()">
+        <option value="bosor">BOSOR Cylinder Buckling — MS distribution</option>
+        <option value="aloha">Aloha Fatigue — MS distribution</option>
+        <option value="flutter">NASA Flutter — FI distribution</option>
+      </select></div>
+    <div class="form-row"><label>Streaming speed</label>
+      <select id="mc-speed">
+        <option value="5">Fast (5ms/sample)</option>
+        <option value="15" selected>Normal (15ms/sample)</option>
+        <option value="40">Slow (40ms/sample)</option>
+      </select></div>
+    <button onclick="startMC()" id="mc-start-btn" style="width:100%;padding:10px;border:1px solid var(--blue);background:transparent;color:var(--blue);font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.06em;margin-top:.5rem;transition:all .2s" onmouseover="this.style.background='var(--blue)';this.style.color='#08090d'" onmouseout="this.style.background='transparent';this.style.color='var(--blue)'">▶ STREAM MONTE CARLO</button>
+    <button onclick="resetMC()" style="width:100%;padding:8px;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:var(--mono);font-size:10px;cursor:pointer;margin-top:.4rem">↺ RESET</button>
+    <div style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)">
+      <div style="background:var(--bg3);padding:.75rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">Samples streamed</div><div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--blue)" id="mc-n">0</div></div>
+      <div style="background:var(--bg3);padding:.75rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">P(failure)</div><div style="font-family:var(--mono);font-size:22px;font-weight:700" id="mc-pf">—</div></div>
+      <div style="background:var(--bg3);padding:.75rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">Mean</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber)" id="mc-mean">—</div></div>
+      <div style="background:var(--bg3);padding:.75rem"><div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:3px">Reliability β</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)" id="mc-beta">—</div></div>
+    </div>
+  </div>
+  <div class="panel" style="padding:.75rem">
+    <div class="panel-title">Live Streaming Histogram</div>
+    <canvas id="mc-stream-canvas" style="width:100%;height:320px;display:block;background:#050608"></canvas>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:.5rem" id="mc-status-txt">Press STREAM to begin. Each dot represents one random sample of manufacturing tolerances and load uncertainty.</div>
+  </div>
+</div>
+<!-- Self-healing timeline -->
+<div class="sec-title" style="margin-top:1rem"><div class="sec-title-line"></div><div class="sec-title-text">CFRP Self-Healing Timeline — Molecular Animation</div><div class="sec-title-line"></div></div>
+<div class="panel" style="padding:1rem">
+  <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
+    <button onclick="runHealTimeline()" style="padding:8px 18px;border:1px solid var(--green);background:transparent;color:var(--green);font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='var(--green)';this.style.color='#08090d'" onmouseout="this.style.background='transparent';this.style.color='var(--green)'">▶ ANIMATE HEALING</button>
+    <button onclick="resetHealTimeline()" style="padding:8px 14px;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:var(--mono);font-size:10px;cursor:pointer">↺ RESET</button>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text2)" id="heal-tl-label">Impact damage state — HGFs intact</div>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:14px;font-weight:700" id="heal-strength-label" style="color:var(--red)">Strength: 69%</div>
+  </div>
+  <canvas id="heal-tl-canvas" style="width:100%;height:220px;display:block;background:#050608;border:1px solid var(--border)"></canvas>
+  <div style="display:flex;gap:2rem;margin-top:.75rem;flex-wrap:wrap">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3)"><span style="color:var(--red)">●</span> Damage zone</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3)"><span style="color:#a020f0">●</span> HGF fibres</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3)"><span style="color:var(--amber)">●</span> Healing agent flow</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3)"><span style="color:var(--green)">●</span> Cured epoxy (restored)</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3)"><span style="color:rgba(77,159,255,0.6)">—</span> CFRP fibres</div>
+  </div>
+</div>
+</div>
+</div><!-- /main -->
+
+<div class="footer">
+  <span>Aerospace Sensitivity Suite · Structural Instability &amp; Sensitivity Analysis · Team Project</span>
+  <span>Prokop 2024 · Bond et al. 2007 · NTSB AAR-89/03 · NASA NTRS · Bushnell 1976 · NASA SP-8007</span>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+function switchModule(id,btn){document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));$(id).classList.add('active');btn.classList.add('active')}
+function setR(el){const mn=+el.min,mx=+el.max,v=+el.value;el.style.setProperty('--pct',((v-mn)/(mx-mn)*100)+'%')}
+document.querySelectorAll('input[type=range]').forEach(el=>{setR(el)});
+function animSlider(id,dispId,from,to,fmt,done){const el=$(id);let s=0;el.classList.add('hl');const iv=setInterval(()=>{s++;const v=from+(to-from)*s/25;el.value=v;$(dispId).textContent=fmt(v);setR(el);if(s>=25){clearInterval(iv);el.classList.remove('hl');done&&done()}},28)}
+function showHeal(boxId,state,title,items,btnLabel,btnClass,cb){const b=$(boxId);b.className='heal-box '+state+' active';b.innerHTML=`<div class="heal-badge">${state.toUpperCase()}</div><div class="heal-title-t">${title}</div><ul class="heal-list">${items.map(i=>`<li>${i}</li>`).join('')}</ul>`;if(btnLabel){const btn=document.createElement('button');btn.className='heal-btn '+btnClass;btn.textContent=btnLabel;btn.onclick=cb;b.appendChild(btn)}}
+function hideHeal(id){const b=$(id);b.className='heal-box';b.innerHTML=''}
+function statusBar(id,pct,col){const f=$(id);f.style.width=pct+'%';f.style.background=col}
+function tornado(cid,params){const mx=Math.max(...params.map(p=>Math.abs(p.d)),0.001);$(cid).innerHTML=params.map(p=>{const pct=(Math.abs(p.d)/mx*100).toFixed(1),col=p.d>0?'#3ddc97':'#e84444';return`<div class="sens-row"><div class="sens-lbl">${p.n}</div><div class="sens-track"><div class="sens-fill" style="width:${pct}%;background:${col}"></div></div><div class="sens-val" style="color:${col}">${p.d>=0?'+':''}${p.d.toFixed(3)}</div></div>`}).join('')}
+const CD={responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6480',font:{family:'Space Mono',size:9}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'#1a1f2e'}},y:{ticks:{color:'#5a6480',font:{family:'Space Mono',size:9}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'#1a1f2e'}}}};
+
+/* MODULE 1 */
+const INCIDENTS=[
+  {id:1,year:1962,system:'Mariner 1',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:false},
+  {id:2,year:1966,system:'Gemini 5',mf:'erroneous',reboot:false,missing:false,loc:'data',unk:false},
+  {id:3,year:1968,system:'Apollo 11 AGC',mf:'erroneous',reboot:true,missing:false,loc:'code',unk:false},
+  {id:4,year:1971,system:'Mariner 9',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:true},
+  {id:5,year:1976,system:'Viking 1',mf:'erroneous',reboot:false,missing:true,loc:'command',unk:true},
+  {id:6,year:1979,system:'Pioneer Venus',mf:'fail-silent',reboot:false,missing:false,loc:'code',unk:false},
+  {id:7,year:1980,system:'Voyager 1',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:8,year:1982,system:'Viking 1 (2nd)',mf:'erroneous',reboot:false,missing:true,loc:'command',unk:false},
+  {id:9,year:1985,system:'Space Shuttle Discovery',mf:'erroneous',reboot:false,missing:false,loc:'code',unk:false},
+  {id:10,year:1988,system:'Phobos 1',mf:'erroneous',reboot:false,missing:false,loc:'command',unk:false},
+  {id:11,year:1990,system:'Hubble Space Telescope',mf:'fail-silent',reboot:false,missing:false,loc:'data',unk:false},
+  {id:12,year:1991,system:'Magellan (2nd)',mf:'erroneous',reboot:true,missing:false,loc:'code',unk:false},
+  {id:13,year:1992,system:'Mars Observer',mf:'fail-silent',reboot:false,missing:true,loc:'code',unk:true},
+  {id:14,year:1993,system:'TOPEX/Poseidon',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:15,year:1994,system:'Clementine',mf:'erroneous',reboot:false,missing:false,loc:'code',unk:false},
+  {id:16,year:1995,system:'Galileo FSW',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:false},
+  {id:17,year:1996,system:'Mars Global Surveyor',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:18,year:1997,system:'Cassini-Huygens',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:true},
+  {id:19,year:1998,system:'Deep Space 1',mf:'fail-silent',reboot:false,missing:false,loc:'code',unk:false},
+  {id:20,year:1998,system:'SOHO',mf:'erroneous',reboot:false,missing:false,loc:'command',unk:false},
+  {id:21,year:1999,system:'Mars Climate Orbiter',mf:'erroneous',reboot:false,missing:false,loc:'data',unk:false},
+  {id:22,year:1999,system:'Mars Polar Lander',mf:'fail-silent',reboot:false,missing:true,loc:'sensor',unk:true},
+  {id:23,year:2000,system:'Cluster II',mf:'erroneous',reboot:false,missing:false,loc:'code',unk:false},
+  {id:24,year:2000,system:'Chandra X-ray',mf:'erroneous',reboot:true,missing:false,loc:'code',unk:false},
+  {id:25,year:2001,system:'Deep Space 2',mf:'fail-silent',reboot:false,missing:true,loc:'code',unk:true},
+  {id:26,year:2002,system:'GRACE',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:27,year:2003,system:'SIRTF/Spitzer',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:false},
+  {id:28,year:2003,system:'Beagle 2',mf:'fail-silent',reboot:false,missing:false,loc:'code',unk:true},
+  {id:29,year:2003,system:'DART demo',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:30,year:2004,system:'Spirit MER-A',mf:'erroneous',reboot:true,missing:false,loc:'data',unk:false},
+  {id:31,year:2004,system:'Opportunity MER-B',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:false},
+  {id:32,year:2004,system:'Cassini (orbit insert)',mf:'erroneous',reboot:false,missing:false,loc:'command',unk:false},
+  {id:33,year:2005,system:'Deep Impact',mf:'erroneous',reboot:false,missing:false,loc:'code',unk:false},
+  {id:34,year:2006,system:'Mars Global Surveyor 2',mf:'erroneous',reboot:false,missing:true,loc:'command',unk:false},
+  {id:35,year:2007,system:'Phoenix Mars Lander',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:36,year:2008,system:'GOCE',mf:'erroneous',reboot:false,missing:false,loc:'code',unk:false},
+  {id:37,year:2009,system:'LRO',mf:'erroneous',reboot:false,missing:true,loc:'data',unk:false},
+  {id:38,year:2009,system:'Kepler',mf:'erroneous',reboot:false,missing:false,loc:'code',unk:true},
+  {id:39,year:2011,system:'Curiosity MSL',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:40,year:2011,system:'Phobos-Grunt',mf:'fail-silent',reboot:false,missing:true,loc:'code',unk:true},
+  {id:41,year:2013,system:'LADEE',mf:'erroneous',reboot:true,missing:false,loc:'code',unk:false},
+  {id:42,year:2014,system:'Rosetta/Philae',mf:'erroneous',reboot:false,missing:true,loc:'sensor',unk:false},
+  {id:43,year:2015,system:'New Horizons',mf:'erroneous',reboot:false,missing:false,loc:'code',unk:false},
+  {id:44,year:2016,system:'Schiaparelli EDM',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:45,year:2016,system:'Hitomi ASTRO-H',mf:'erroneous',reboot:false,missing:false,loc:'data',unk:false},
+  {id:46,year:2017,system:'OSIRIS-REx',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:false},
+  {id:47,year:2018,system:'InSight Lander',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:48,year:2018,system:'Hayabusa2',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:false},
+  {id:49,year:2019,system:'Beresheet',mf:'fail-silent',reboot:false,missing:false,loc:'code',unk:false},
+  {id:50,year:2019,system:'Chandrayaan-2',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:true},
+  {id:51,year:2020,system:'Perseverance',mf:'erroneous',reboot:false,missing:false,loc:'code',unk:false},
+  {id:52,year:2021,system:'Ingenuity (first flight)',mf:'erroneous',reboot:false,missing:true,loc:'code',unk:false},
+  {id:53,year:2021,system:'JWST (mirror alignment)',mf:'erroneous',reboot:false,missing:false,loc:'data',unk:false},
+  {id:54,year:2022,system:'DART (Dimorphos impact)',mf:'erroneous',reboot:false,missing:false,loc:'sensor',unk:false},
+  {id:55,year:2023,system:'Voyager 1 (anomaly)',mf:'erroneous',reboot:false,missing:false,loc:'data',unk:true}
+];
+const CFRP={flex:{'70':{und:92,dam:76,heal:89,vf:3},'140':{und:95,dam:78,heal:85,vf:2},'200':{und:98,dam:69,heal:80,vf:1},opt:{und:101,dam:63,heal:92,vf:6}},cai:{'70':{und:88,dam:70,heal:84,vf:3},'140':{und:91,dam:72,heal:80,vf:2},'200':{und:94,dam:65,heal:76,vf:1},opt:{und:97,dam:58,heal:88,vf:6}}};
+
+function calculate(){
+  const sys=$('sys-type').value,errLoc=$('err-loc').value,phase=$('phase').value,cov=+$('test-cov').value,backup=$('backup').value;
+  $('tcov-val').textContent=cov+'%';
+  const baseErr={spacecraft:0.85,launch:0.80,aircraft:0.72,missile:0.78}[sys]||0.85;
+  const locM={code:1.0,data:0.85,sensor:0.9,command:0.75}[errLoc]||1.0;
+  const phM={launch:1.3,cruise:0.85,entry:1.2,ground:0.6}[phase]||1.0;
+  const covR=1-cov/100*0.7;
+  const bkR={none:1.0,watchdog:0.92,dissimilar:0.65,manual:0.75,full:0.40}[backup]||1.0;
+  const errRisk=Math.min(0.99,baseErr*locM*phM*covR*bkR);
+  const silRisk=Math.min(0.99,(1-baseErr)*phM*covR*bkR*0.8);
+  const missRisk=Math.min(0.99,0.40*locM*covR);
+  const overall=Math.min(0.99,(errRisk+silRisk)/2);
+  const reboot=0.02*(1+(backup==='watchdog'?0.3:0));
+  const after=overall*(errLoc==='code'?0.3:errLoc==='sensor'?0.4:0.45);
+  const fmt=v=>(v*100).toFixed(1)+'%';
+  const cls=v=>v>0.6?'high':v>0.3?'med':'low';
+  $('r-err').textContent=fmt(errRisk);$('r-err').className='rc-val '+cls(errRisk);
+  $('r-sil').textContent=fmt(silRisk);$('r-sil').className='rc-val '+cls(silRisk);
+  $('r-miss').textContent=fmt(missRisk);$('r-miss').className='rc-val '+cls(missRisk);
+  $('rb-pct').textContent=fmt(overall);
+  $('rb-fill').style.width=(overall*100).toFixed(1)+'%';
+  $('rb-fill').style.background=overall>0.6?'#e84444':overall>0.3?'#f5a623':'#3ddc97';
+  $('rb-reboot').textContent=fmt(reboot);$('rb-reboot-fill').style.width=(reboot*500).toFixed(1)+'%';
+  $('rb-after').textContent=fmt(after);$('rb-after-fill').style.width=(after*100).toFixed(1)+'%';
+  const hist={code:'Closest match: Mariner 1 (1962) — missing hyphen in FORTRAN caused erroneous guidance. Mars Climate Orbiter (1999) — unit conversion error (lbf·s vs N·s) caused loss.',data:'Closest match: Mars Climate Orbiter (1999) — metric/imperial mismatch. Hubble (1990) — incorrect mirror prescription data yielded 1.3 arcsec blur.',sensor:'Closest match: Schiaparelli EDM (2016) — IMU saturated, lander incorrectly computed altitude. Mars Polar Lander (1999) — leg-deploy sensor falsely triggered engine cutoff.',command:'Closest match: Phobos 1 (1988) — erroneous ground command sent in test mode disabled attitude control. Viking-1 (1982) — command overwrote antenna pointing permanently.'};
+  $('hist-match').textContent=hist[errLoc]||'—';
+  const allStrats={code:[{rank:'1st',title:'N-version programming (dissimilar redundancy)',eff:'high',effPct:70,desc:'Three independent software implementations vote on output. Mariner 1 (1962): a single transcription error would have been overridden.',src:'Prokop 2024 §III.2'},{rank:'2nd',title:'Formal specification + exhaustive unit testing',eff:'high',effPct:60,desc:'Formal methods (TLA+, model checking) eliminate entire error classes. Coverage > 85% reduces code-layer errors by ~60% based on the 55-incident dataset.',src:'Prokop 2024 §III.5'},{rank:'3rd',title:'Runtime assertion + watchpoint monitoring',eff:'med',effPct:40,desc:'Embed invariant checks at runtime. Used on Spirit MER-A (2004) flash file system recovery.',src:'Prokop 2024 §III.8'}],data:[{rank:'1st',title:'Dimensional analysis enforcement at interfaces',eff:'high',effPct:75,desc:'Compile-time unit checking prevents Mars Climate Orbiter-class errors. MCO (1999) lost due to lbf·s vs N·s — a type system catches this.',src:'Prokop 2024 §III.14'},{rank:'2nd',title:'Database schema validation + checksum on uplink',eff:'high',effPct:60,desc:'Verify all uploaded tables against signed checksums before use. Hitomi (2016): incorrect attitude table could have been rejected.',src:'Prokop 2024 §III.19'},{rank:'3rd',title:'Cross-check against independent ephemeris',eff:'med',effPct:45,desc:'Any state divergence above threshold triggers safe mode before mission-critical actions.',src:'Prokop 2024 §III.21'}],sensor:[{rank:'1st',title:'Sensor voting (triple redundancy) with plausibility',eff:'high',effPct:65,desc:'Three-sensor voting with engineering plausibility limits. Schiaparelli (2016): single IMU saturation caused 1-second altitude error that triggered premature engine cutoff.',src:'Prokop 2024 §III.25'},{rank:'2nd',title:'Physical plausibility bounds on all sensor inputs',eff:'high',effPct:55,desc:'Reject readings outside physical bounds. Mars Polar Lander (1999): vibration falsely triggered touchdown; a velocity cross-check would have caught it.',src:'Prokop 2024 §III.27'},{rank:'3rd',title:'Graceful degradation with sensor loss detected',eff:'med',effPct:40,desc:'Spirit rover (2004) recovered from flash anomaly by detecting abnormal boot behaviour and falling back to safe mode.',src:'Prokop 2024 §III.29'}],command:[{rank:'1st',title:'Command validation with range and context checks',eff:'high',effPct:80,desc:'All commands checked against permitted-range database. Phobos 1 (1988): erroneous test command would have been rejected by context-aware validator.',src:'Prokop 2024 §III.4'},{rank:'2nd',title:'Command echo/confirmation protocol',eff:'high',effPct:70,desc:'Require explicit acknowledgment before execution. Viking-1 (1982): erroneous command overwrote antenna pointing permanently.',src:'Prokop 2024 §III.7'},{rank:'3rd',title:'Protected memory regions for critical data',eff:'med',effPct:55,desc:'Mars Global Surveyor (2006): maintenance command wrote to wrong memory location, losing antenna pointing.',src:'Prokop 2024 §III.33'}]};
+  const strats=allStrats[errLoc]||allStrats.code;
+  $('strategy-grid').innerHTML=strats.map(s=>`<div class="sg"><div class="sg-rank">${s.rank} strategy · ${errLoc} errors</div><div class="sg-title">${s.title}</div><div class="sg-eff ${s.eff}">Risk reduction: −${s.effPct}% | New risk: ${(overall*(1-s.effPct/100)*100).toFixed(1)}%</div><div class="sg-desc">${s.desc}</div><div class="sg-src">Source: ${s.src}</div></div>`).join('');
+}
+
+function calcCFRP(){
+  const pitch=$('hgf-pitch').value,ttype=$('test-type').value,impE=+$('impact-e').value,htemp=+$('heal-temp').value;
+  $('ie-val').textContent=impE.toFixed(1)+' J';$('ht-val').textContent=htemp+'°C';
+  const d=CFRP[ttype][pitch],eFactor=1-(impE-3)*0.05;
+  const dam=Math.max(40,Math.round(d.dam*eFactor)),tempF=htemp>=100?1.0:htemp>=70?0.92:0.78;
+  const heal=Math.min(100,Math.round(d.heal*tempF));
+  $('cf-und').textContent=d.und+'%';$('cf-dam').textContent=dam+'%';$('cf-heal').textContent=heal+'%';
+  $('cf-und-bar').style.width=d.und+'%';$('cf-dam-bar').style.width=dam+'%';$('cf-heal-bar').style.width=heal+'%';
+  $('cf-verdict').textContent=heal>=90?`Excellent healing — ${heal}% strength recovered. Structure cleared for continued operation.`:heal>=80?`Good healing — ${heal}% strength recovered. Recommend re-inspection after next cycle.`:`Partial healing — ${heal}% recovered. Consider increasing HGF volume fraction.`;
+}
+
+let activeFilter='all',activeSearch='';
+function renderTable(){
+  const body=$('tbl-body');
+  let filtered=INCIDENTS.filter(i=>{
+    const s=activeSearch.toLowerCase();
+    const ms=!s||i.system.toLowerCase().includes(s)||i.year.toString().includes(s)||i.mf.includes(s)||i.loc.includes(s);
+    let mf=true;
+    if(activeFilter==='erroneous')mf=i.mf==='erroneous';
+    else if(activeFilter==='fail-silent')mf=i.mf==='fail-silent';
+    else if(activeFilter==='missing')mf=i.missing;
+    else if(activeFilter==='code')mf=i.loc==='code';
+    else if(activeFilter==='sensor')mf=i.loc==='sensor';
+    else if(activeFilter==='data')mf=i.loc==='data';
+    return ms&&mf;
+  });
+  body.innerHTML=filtered.map(i=>`<tr><td>${i.id}</td><td>${i.year}</td><td>${i.system}</td><td><span class="badge ${i.mf==='erroneous'?'b-err':'b-sil'}">${i.mf==='erroneous'?'ERRONEOUS':'FAIL-SILENT'}</span></td><td><span class="badge ${i.reboot?'b-yes':'b-no'}">${i.reboot?'YES':'NO'}</span></td><td><span class="badge ${i.missing?'b-yes':'b-no'}">${i.missing?'YES':'NO'}</span></td><td><span class="badge ${i.loc==='code'?'b-code':i.loc==='data'?'b-data':i.loc==='sensor'?'b-sens':'b-cmd'}">${i.loc.toUpperCase()}</span></td><td><span class="badge ${i.unk?'b-err':'b-no'}">${i.unk?'YES':'NO'}</span></td></tr>`).join('');
+}
+function filterBy(f,btn){activeFilter=f;document.querySelectorAll('.tf').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTable()}
+function filterTable(){activeSearch=$('tbl-search').value;renderTable()}
+
+new Chart($('c1').getContext('2d'),{type:'doughnut',data:{labels:['Erroneous output (85%)','Fail-silent (15%)'],datasets:[{data:[85,15],backgroundColor:['rgba(232,68,68,0.75)','rgba(77,159,255,0.75)'],borderWidth:2,borderColor:['#e84444','#4d9fff']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'Space Mono',size:9},color:'#9da5bc',boxWidth:10}}}}});
+new Chart($('c2').getContext('2d'),{type:'bar',data:{labels:['Code/Logic','Data','Sensor input','Command input'],datasets:[{data:[58,16,15,11],backgroundColor:['rgba(245,166,35,0.7)','rgba(77,159,255,0.7)','rgba(232,68,68,0.7)','rgba(61,220,151,0.7)'],borderWidth:1,borderColor:['#f5a623','#4d9fff','#e84444','#3ddc97']}]},options:{...CD}});
+new Chart($('c3').getContext('2d'),{type:'bar',data:{labels:['70μm HGF','200μm HGF','Opt 5-iface'],datasets:[{label:'Undamaged',data:[92,98,101],backgroundColor:'rgba(77,159,255,0.7)',borderColor:'#4d9fff',borderWidth:1},{label:'After impact',data:[76,69,63],backgroundColor:'rgba(232,68,68,0.7)',borderColor:'#e84444',borderWidth:1},{label:'After healing',data:[89,80,92],backgroundColor:'rgba(61,220,151,0.7)',borderColor:'#3ddc97',borderWidth:1}]},options:{...CD,plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'Space Mono',size:9},color:'#9da5bc',boxWidth:10}}},scales:{...CD.scales,y:{...CD.scales.y,min:50,max:110}}}});
+
+/* MODULE 2 */
+const MATS={al2024:{E:73.1e9,fy:345e6,nu:0.33,CoV:0.03},al7075:{E:71.7e9,fy:503e6,nu:0.33,CoV:0.03},ti6al4v:{E:113.8e9,fy:880e6,nu:0.342,CoV:0.04},steel4130:{E:200e9,fy:435e6,nu:0.29,CoV:0.03},cfrp:{E:135e9,fy:1500e6,nu:0.28,CoV:0.06}};
+const KBC={pin_pin:1.0,fixed_fixed:0.5,fixed_pin:0.7,fixed_free:2.0};
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+let bMcChart,bThickChart,bKdfChart;
+
+function runBOSOR(){
+  const struct=$('b-struct').value,mat=MATS[$('b-mat').value],Pa=+$('b-load').value,L=+$('b-L').value,R=+$('b-R').value,t=+$('b-t').value/1000,bc=$('b-bc').value,ns=+$('b-ns').value,Keff=KBC[bc];
+  $('b-load-v').textContent=Pa;$('b-L-v').textContent=L.toFixed(1);$('b-R-v').textContent=R.toFixed(2);$('b-t-v').textContent=(t*1000).toFixed(1);$('b-ns-v').textContent=ns;
+  const E=mat.E,fy=mat.fy,nu=mat.nu,KL=Keff*L,PaN=Pa*1000,PlN=PaN*1.5;
+  let Pcr,KDF,sigma_a;
+  if(struct==='column'){const I=Math.PI*R**3*t,A=Math.PI*((R+t)**2-R**2),lam=KL/R,lamc=Math.PI*Math.sqrt(2*E/fy);let sc=lam>=lamc?Math.PI**2*E*I/KL**2:fy*(1-fy*lam**2/(4*Math.PI**2*E))*A;KDF=1/(1+0.003*lam);Pcr=KDF*sc*(1+0.08*ns);sigma_a=PaN/A}
+  else if(struct==='panel'){const b=R,asp=L/b,m=Math.max(1,Math.round(asp)),kc=(m/asp+asp/m)**2,sc=kc*Math.PI**2*E*t**2/(12*(1-nu**2)*b**2);KDF=Math.max(0.5,1-0.25*Math.sqrt(t/b));Pcr=KDF*sc*t*b*(1+0.08*ns);sigma_a=PaN/(b*t)}
+  else{const A=2*Math.PI*R*t,phi=(1/29.8)*Math.sqrt(R/t);KDF=1-0.901*(1-Math.exp(-phi));Pcr=KDF*0.6055*E*(t/R)*A*(1+0.08*ns);sigma_a=PaN/A}
+  const MS1=Pcr/PaN-1,MS2=Pcr/PlN-1,MS3=fy/sigma_a-1,Rc=PaN/Pcr,Rs=0.15,Rp=0.10,inter=Rc+Rs**2+Rp**2,MS4=1/inter-1,RF=Pcr/PaN;
+  function fms(v){const c=v>=0.15?'#3ddc97':v>=0?'#f5a623':'#e84444';return`<span style="color:${c}">${v>=0?'+':''}${v.toFixed(4)}</span>`}
+  $('b-pcr').textContent=(Pcr/1000).toFixed(1);$('b-pcr').style.color=MS1>=0?'#3ddc97':'#e84444';
+  $('b-kdf').textContent=KDF.toFixed(3);$('b-ms').textContent=(MS1>=0?'+':'')+MS1.toFixed(3);$('b-ms').style.color=MS1>=0.15?'#3ddc97':MS1>=0?'#f5a623':'#e84444';
+  $('b-ms1').innerHTML=fms(MS1);$('b-ms2').innerHTML=fms(MS2);$('b-ms3').innerHTML=fms(MS3);$('b-ms4').innerHTML=fms(MS4);
+  $('b-rf').innerHTML=`<span style="color:${RF>=1.5?'#3ddc97':'#e84444'}">${RF.toFixed(3)}</span>`;
+  $('b-rc').innerHTML=`<span style="color:${Rc<1?'#3ddc97':'#e84444'}">${Rc.toFixed(3)}</span>`;
+  const pass=MS1>=0&&MS2>=0&&MS3>=0;const vb=$('b-verdict-box');
+  vb.className='verdict-box '+(pass?'verdict-pass':'verdict-fail');
+  $('b-verdict').textContent=pass?'✓ PASS — All margins of safety ≥ 0':'✗ FAIL — Negative margin detected — redesign required';
+  $('b-recs').textContent=pass?`P_cr = ${(Pcr/1000).toFixed(1)} kN vs P_applied = ${Pa} kN. KDF = ${KDF.toFixed(3)} (NASA SP-8007 imperfection factor).`:`Increase wall thickness by ~${(Math.abs(MS2)*100).toFixed(1)}% or add ${Math.max(1,ns+2)} stiffeners to restore margin.`;
+  // MC
+  const N=1000,mcs=[];for(let i=0;i<N;i++){const ts=t*(1+0.04*randn()),Ls=L*(1+0.005*randn()),Rs=R*(1+0.003*randn()),Es=E*(1+mat.CoV*randn()),Ps=PaN*(1+0.08*randn());let pc;if(struct==='column'){const Is=Math.PI*Rs**3*ts,KLs=Keff*Ls,lams=KLs/Rs,kdf=1/(1+0.003*lams);pc=kdf*Math.PI**2*Es*Is/KLs**2}else if(struct==='panel'){const b=Rs,asp=Ls/b,m=Math.max(1,Math.round(asp)),kc=(m/asp+asp/m)**2,kdf=Math.max(0.5,1-0.25*Math.sqrt(ts/b));pc=kdf*kc*Math.PI**2*Es*ts**2/(12*(1-nu**2)*b**2)*ts*b}else{const A=2*Math.PI*Rs*ts,phi=(1/29.8)*Math.sqrt(Rs/ts),kdf=1-0.901*(1-Math.exp(-phi));pc=kdf*0.6055*Es*(ts/Rs)*A}mcs.push(pc/Ps-1)}
+  const mn=mcs.reduce((a,b)=>a+b,0)/N,sd=Math.sqrt(mcs.reduce((a,v)=>a+(v-mn)**2,0)/N),pf=(mcs.filter(v=>v<0).length/N*100).toFixed(2),beta=sd>0?(mn/sd).toFixed(2):'>10';
+  $('b-beta').textContent=beta;$('b-beta').style.color=+beta>=4?'#3ddc97':+beta>=3?'#f5a623':'#e84444';
+  $('b-mc-stats').innerHTML=`<span style="font-family:var(--mono);font-size:10px;color:var(--text2)">Mean MS: <b style="color:var(--amber)">${mn.toFixed(4)}</b> &nbsp;|&nbsp; σ: <b>${sd.toFixed(4)}</b> &nbsp;|&nbsp; P_fail: <b style="color:${+pf>1?'#e84444':'#3ddc97'}">${pf}%</b> &nbsp;|&nbsp; β: <b style="color:${+beta>=4?'#3ddc97':'#e84444'}">${beta}</b></span>`;
+  const pcrkN=mcs.map(v=>(v+1)*PaN/1000),minV=Math.min(...pcrkN),maxV=Math.max(...pcrkN),bs=25,bsz=(maxV-minV)/bs,cnts=new Array(bs).fill(0),lbls=[];
+  for(let i=0;i<bs;i++)lbls.push((minV+(i+0.5)*bsz).toFixed(0));
+  pcrkN.forEach(v=>{const idx=Math.min(Math.floor((v-minV)/bsz),bs-1);cnts[idx]++});
+  if(!bMcChart){bMcChart=new Chart($('b-mc-chart').getContext('2d'),{type:'bar',data:{labels:lbls,datasets:[{label:'P_cr samples',data:cnts,backgroundColor:'rgba(77,159,255,0.5)',borderColor:'#4d9fff',borderWidth:1}]},options:{...CD,scales:{...CD.scales,x:{...CD.scales.x,ticks:{...CD.scales.x.ticks,maxTicksLimit:6}}}}})}
+  else{bMcChart.data.labels=lbls;bMcChart.data.datasets[0].data=cnts;bMcChart.update()}
+  // thickness sweep
+  const tarr=[],parr=[];for(let ti=t*0.5;ti<=t*2.0;ti+=t*0.05){tarr.push((ti*1000).toFixed(2));let p;if(struct==='column'){const I=Math.PI*R**3*ti,lam=KL/R,kdf=1/(1+0.003*lam);p=kdf*Math.PI**2*E*I/KL**2/1000}else if(struct==='panel'){const asp=L/R,m=Math.max(1,Math.round(asp)),kc=(m/asp+asp/m)**2,kdf=Math.max(0.5,1-0.25*Math.sqrt(ti/R));p=kdf*kc*Math.PI**2*E*ti**2/(12*(1-nu**2)*R**2)*ti*R/1000}else{const A=2*Math.PI*R*ti,phi=(1/29.8)*Math.sqrt(R/ti),kdf=1-0.901*(1-Math.exp(-phi));p=kdf*0.6055*E*(ti/R)*A/1000}parr.push(+p.toFixed(2))}
+  if(!bThickChart){bThickChart=new Chart($('b-thick-chart').getContext('2d'),{type:'line',data:{labels:tarr,datasets:[{data:parr,borderColor:'#4d9fff',backgroundColor:'rgba(77,159,255,0.06)',fill:true,pointRadius:0,borderWidth:2,tension:0.3}]},options:{...CD,scales:{...CD.scales,x:{...CD.scales.x,title:{display:true,text:'t (mm)',color:'#5a6480',font:{size:9,family:'Space Mono'}},ticks:{...CD.scales.x.ticks,maxTicksLimit:6}},y:{...CD.scales.y,title:{display:true,text:'P_cr (kN)',color:'#5a6480',font:{size:9,family:'Space Mono'}}}}}})}
+  else{bThickChart.data.labels=tarr;bThickChart.data.datasets[0].data=parr;bThickChart.update()}
+  if(!bKdfChart){const Rt=[],kda=[];for(let r=100;r<=3000;r+=20){Rt.push(r);kda.push(+(1-0.901*(1-Math.exp(-(1/29.8)*Math.sqrt(r)))).toFixed(4))}const dotRt=R/t,dotKdf=1-0.901*(1-Math.exp(-(1/29.8)*Math.sqrt(dotRt)));bKdfChart=new Chart($('b-kdf-chart').getContext('2d'),{type:'line',data:{labels:Rt,datasets:[{data:kda,borderColor:'#3ddc97',backgroundColor:'rgba(61,220,151,0.06)',fill:true,pointRadius:0,borderWidth:2,tension:0.3},{label:'Design point',data:[{x:dotRt,y:+dotKdf.toFixed(4)}],borderColor:'#f5a623',backgroundColor:'#f5a623',pointRadius:8,type:'scatter',showLine:false}]},options:{...CD,scales:{...CD.scales,x:{...CD.scales.x,type:'linear',title:{display:true,text:'R/t ratio',color:'#5a6480',font:{size:9,family:'Space Mono'}},ticks:{...CD.scales.x.ticks,maxTicksLimit:6}},y:{...CD.scales.y,title:{display:true,text:'Knockdown Factor',color:'#5a6480',font:{size:9,family:'Space Mono'}}}}}})}}
+
+/* MODULE 3 */
+function switchCase(i){document.querySelectorAll('.case-btn').forEach((b,j)=>b.classList.toggle('active',i===j));document.querySelectorAll('.case-panel').forEach((p,j)=>p.classList.toggle('active',i===j))}
+
+let aHealState=null;
+function alohaResidual(c,cor,crd){return 280*Math.max(0,1-(c/120)*0.65)*Math.pow(1/cor,1.2)*Math.max(0,1-(crd/20)*0.7)}
+function updateAloha(){
+  const cyc=+$('a-cyc').value,cor=+$('a-cor').value,crd=+$('a-crd').value,prs=+$('a-prs').value,ins=+$('a-ins').value;
+  $('a-cyc-v').textContent=cyc;$('a-cor-v').textContent=cor.toFixed(2);$('a-crd-v').textContent=crd.toFixed(1);$('a-prs-v').textContent=prs.toFixed(1);$('a-ins-v').textContent=ins.toFixed(2);
+  const res=alohaResidual(cyc,cor,crd),app=prs*1.5+60,ms=res/app-1,fp=Math.max(0,Math.min(100,(1-ins)*(1-ms)*50)).toFixed(1);
+  $('a-app').textContent=app.toFixed(1);$('a-res').textContent=res.toFixed(1);
+  $('a-ms').textContent=ms.toFixed(3);$('a-ms').className='m-num '+(ms>0.2?'safe':ms>0?'warn':'danger');
+  $('a-fp').textContent=fp+'%';$('a-fp').className='m-num '+(+fp>30?'danger':+fp>10?'warn':'safe');
+  statusBar('a-sbar',Math.max(0,Math.min(ms/1.5*100,100)),ms>0.2?'#3ddc97':ms>0?'#f5a623':'#e84444');
+  tornado('a-tornado',[
+    {n:'Corrosion factor',d:alohaResidual(cyc,cor*1.1,crd)/app-1-ms},
+    {n:'Flight cycles',d:alohaResidual(cyc*1.1,cor,crd)/app-1-ms},
+    {n:'Crack density',d:alohaResidual(cyc,cor,crd*1.1)/app-1-ms},
+    {n:'Cabin pressure',d:res/(prs*1.1*1.5+60)-1-ms},
+    {n:'Inspection sensitivity',d:0.04*ins}
+  ].sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)));
+  if(ms<=0.2&&aHealState!=='healed'){
+    const sc=Math.max(5,cyc*0.6),scor=Math.max(1,cor*0.75);
+    showHeal('a-heal','unsafe',ms<=0?'Structural failure — MS has reached zero (replicating Aloha S-10L)':'Margin of safety below certified threshold',
+      [`MS = ${ms.toFixed(3)} — matches conditions at lap joint S-10L on Aloha N73711`,ms<=0?'Residual strength ≤ applied hoop stress — failure imminent':'Operating with insufficient safety margin','Self-healing: reduce cycle damage, improve corrosion control, clear cracks'],
+      'Apply self-healing →','apply',()=>{
+        aHealState='healing';
+        showHeal('a-heal','healing','Applying structural recovery programme…',['Reducing accumulated damage factor…','Improving corrosion protection…','Clearing detected cracks…'],null,null,null);
+        animSlider('a-cyc','a-cyc-v',cyc,sc,v=>Math.round(v),()=>
+          animSlider('a-cor','a-cor-v',cor,scor,v=>v.toFixed(2),()=>
+            animSlider('a-crd','a-crd-v',crd,0,v=>v.toFixed(1),()=>{
+              aHealState='healed';
+              showHeal('a-heal','healed','Structure rehabilitated — margin restored',
+                [`Cycle damage: ${cyc}k → ${sc}k`,`Corrosion: ${cor.toFixed(2)} → ${scor.toFixed(2)}`,'Crack density cleared to zero','MS now above 0.20 certified minimum','Note: In the real accident no self-healing was applied — this is the counterfactual outcome'],
+                'Reset to Aloha conditions','reset-btn',()=>{
+                  aHealState=null;$('a-cyc').value=40;$('a-cor').value=1.2;$('a-crd').value=0;$('a-prs').value=8.6;$('a-ins').value=0.6;
+                  ['a-cyc','a-cor','a-crd','a-prs','a-ins'].forEach(id=>setR($(id)));updateAloha()
+                });updateAloha()
+            })))
+      })
+  }else if(ms>0.2){aHealState=null;hideHeal('a-heal')}
+}
+
+let nHealState=null;
+function vfCalc(ei,gj,mu,de){const b=(2*Math.sqrt(gj*1e6/(0.45*2000*12.25))/(2*Math.PI))*Math.sqrt(mu*gj/ei),Vf=Math.max(60,Math.min(500,15+b*(1+0.01)*Math.sqrt(ei/10)*8));return{Vf,trueVf:Vf-(de/100)*Vf}}
+function updateNasa(){
+  const ei=+$('n-ei').value,gj=+$('n-gj').value,mu=+$('n-mu').value,va=+$('n-va').value,de=+$('n-de').value;
+  $('n-ei-v').textContent=ei.toFixed(1);$('n-gj-v').textContent=gj.toFixed(1);$('n-mu-v').textContent=mu;$('n-va-v').textContent=va;$('n-de-v').textContent=de.toFixed(1);
+  const{Vf,trueVf}=vfCalc(ei,gj,mu,de),fi=va/trueVf;
+  $('n-vf').textContent=Vf.toFixed(0)+' m/s';$('n-tvf').textContent=trueVf.toFixed(0)+' m/s';
+  $('n-fi').textContent=fi.toFixed(3);$('n-fi').className='m-num '+(fi<0.75?'safe':fi<1?'warn':'danger');
+  const vEl=$('n-ver');if(fi<0.75){vEl.textContent='Safe';vEl.className='m-num safe'}else if(fi<1){vEl.textContent='Marginal';vEl.className='m-num warn'}else{vEl.textContent='FLUTTER';vEl.className='m-num danger'}
+  statusBar('n-sbar',Math.min(fi*100,100),fi<0.75?'#3ddc97':fi<1?'#f5a623':'#e84444');
+  tornado('n-tornado',[
+    {n:'Torsional stiffness GJ',d:(vfCalc(ei,gj*1.1,mu,de).trueVf-trueVf)/trueVf},
+    {n:'Damping error δ_ζ',d:-(vfCalc(ei,gj,mu,de*1.1).trueVf-trueVf)/trueVf},
+    {n:'Mass ratio μ',d:(vfCalc(ei,gj,mu*1.1,de).trueVf-trueVf)/trueVf},
+    {n:'Bending stiffness EI',d:(vfCalc(ei*1.1,gj,mu,de).trueVf-trueVf)/trueVf},
+    {n:'Airspeed V',d:0}
+  ].sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)));
+  if(fi>=0.75&&nHealState!=='healed'){
+    const sVa=trueVf*0.68,sGJ=Math.min(15,gj*(fi/0.68)),sDe=Math.min(de,1.5);
+    showHeal('n-heal','unsafe',fi>=1?'Flutter onset — replicating NASA ATW over-speed condition':'Approaching flutter boundary',
+      [`FI=${fi.toFixed(3)}: pilot believes V_f=${Vf.toFixed(0)} m/s but true flutter is ${trueVf.toFixed(0)} m/s due to ${de.toFixed(1)}% damping error`,fi>=1?'Aircraft has entered flutter':'Damping identification error has eroded the safety margin','Self-healing: reduce airspeed, increase GJ, improve GVT accuracy to δ_ζ < 1.5%'],
+      'Apply self-healing →','apply',()=>{
+        nHealState='healing';
+        showHeal('n-heal','healing','Applying flutter suppression…',['Reducing airspeed…','Increasing torsional stiffness…','Improving damping measurement accuracy…'],null,null,null);
+        animSlider('n-va','n-va-v',va,sVa,v=>v.toFixed(0),()=>
+          animSlider('n-gj','n-gj-v',gj,sGJ,v=>v.toFixed(1),()=>
+            animSlider('n-de','n-de-v',de,sDe,v=>v.toFixed(1),()=>{
+              nHealState='healed';
+              showHeal('n-heal','healed','Flutter suppressed — within NASA-certified safe margin',
+                [`Airspeed: ${va} → ${sVa.toFixed(0)} m/s`,`GJ: ${gj.toFixed(1)} → ${sGJ.toFixed(1)} ×10⁶ N·m²`,`GVT damping error: ${de.toFixed(1)}% → ${sDe.toFixed(1)}%`,'Flutter index now below 0.75 safe limit'],
+                'Reset to NASA baseline','reset-btn',()=>{
+                  nHealState=null;$('n-ei').value=8.5;$('n-gj').value=5.2;$('n-mu').value=18;$('n-va').value=160;$('n-de').value=3;
+                  ['n-ei','n-gj','n-mu','n-va','n-de'].forEach(id=>setR($(id)));updateNasa()
+                });updateNasa()
+            })))
+      })
+  }else if(fi<0.75){nHealState=null;hideHeal('n-heal')}
+}
+
+let fHealState=null;
+function updateF16(){
+  const cma=+$('f-cma').value,cla=+$('f-cla').value,xcg=+$('f-xcg').value,mach=+$('f-mach').value,ns=+$('f-ns').value;
+  $('f-cma-v').textContent=(cma>=0?'':'\u2212')+Math.abs(cma).toFixed(2);$('f-cla-v').textContent=cla.toFixed(2);$('f-xcg-v').textContent=xcg.toFixed(3);$('f-mach-v').textContent=mach.toFixed(2);$('f-ns-v').textContent=ns.toFixed(1);
+  const npShift=mach>1?(mach-1)*0.015:0,xnp=-cma/cla+npShift,sm=xnp-xcg;
+  $('f-xnp').textContent=xnp.toFixed(3);
+  $('f-sm').textContent=(sm*100).toFixed(1)+'%';$('f-sm').className='m-num '+(sm>0.05?'safe':sm>-0.02?'warn':'danger');
+  $('f-sas').textContent=cma<0?'Active':'FAILED';$('f-sas').className=cma<0?'m-num safe':'m-num danger';
+  const vEl=$('f-ver');if(sm>0.05){vEl.textContent='Stable';vEl.className='m-num safe'}else if(sm>-0.02){vEl.textContent='FBW Limit';vEl.className='m-num warn'}else{vEl.textContent='DIVERGE';vEl.className='m-num danger'}
+  statusBar('f-sbar',Math.max(0,Math.min((sm+0.15)/0.3*100,100)),sm>0.05?'#3ddc97':sm>-0.02?'#f5a623':'#e84444');
+  const sc=(c,l,x,m)=>{const n=-c/l+(m>1?(m-1)*0.015:0);return n-x};
+  tornado('f-tornado',[
+    {n:'CG position x_cg/c̄',d:sc(cma,cla,xcg*1.1,mach)-sm},
+    {n:'Cm_α derivative',d:sc(cma*1.1,cla,xcg,mach)-sm},
+    {n:'Mach number (NP shift)',d:sc(cma,cla,xcg,mach+0.1)-sm},
+    {n:'CL_α derivative',d:sc(cma,cla*1.1,xcg,mach)-sm},
+    {n:'Derivative noise δ',d:-ns*0.003}
+  ].sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)));
+  if(sm<=-0.02&&fHealState!=='healed'){
+    const sCG=Math.max(0.15,xnp-0.08),sCma=Math.min(-0.5,cma-0.3);
+    showHeal('f-heal','unsafe',sm<-0.05?'Aircraft entering uncontrolled pitch divergence':'FBW stability limit reached',
+      [`SM = ${(sm*100).toFixed(1)}% — F-16 FBW limit is −2%`,sm<-0.05?'CG so far aft that FBW cannot compensate':'SAS operating at saturation','Self-healing: shift CG forward, increase Cm_α authority'],
+      'Apply self-healing →','apply',()=>{
+        fHealState='healing';
+        showHeal('f-heal','healing','Restoring F-16 stability envelope…',['Shifting CG to certified forward limit…','Restoring SAS augmentation authority…'],null,null,null);
+        animSlider('f-xcg','f-xcg-v',xcg,sCG,v=>v.toFixed(3),()=>
+          animSlider('f-cma','f-cma-v',cma,sCma,v=>(v>=0?'':'\u2212')+Math.abs(v).toFixed(2),()=>{
+            fHealState='healed';
+            showHeal('f-heal','healed','F-16 stability restored — within certified FBW envelope',
+              [`CG: ${xcg.toFixed(3)} → ${sCG.toFixed(3)} c̄`,`Cm_α: ${cma.toFixed(2)} → ${sCma.toFixed(2)}`,'Static margin within FBW control authority','SAS can maintain controlled flight at this configuration'],
+              'Reset to F-16 baseline','reset-btn',()=>{
+                fHealState=null;$('f-cma').value=-1.5;$('f-cla').value=3.8;$('f-xcg').value=0.32;$('f-mach').value=0.8;$('f-ns').value=2;
+                ['f-cma','f-cla','f-xcg','f-mach','f-ns'].forEach(id=>setR($(id)));updateF16()
+              });updateF16()
+          }))
+      })
+  }else if(sm>-0.02){fHealState=null;hideHeal('f-heal')}
+}
+
+// Static charts for Module 3
+const cyc=Array.from({length:30},(_,i)=>i*3+5);
+new Chart($('alohaChart').getContext('2d'),{type:'line',data:{labels:cyc,datasets:[{label:'Design life',data:cyc.map(c=>Math.max(0,280*(1-(c/120)*0.4))),borderColor:'#4d9fff',backgroundColor:'rgba(77,159,255,0.06)',fill:true,pointRadius:0,borderWidth:2,borderDash:[5,3]},{label:'Coastal corrosion',data:cyc.map(c=>Math.max(0,280*(1-(c/120)*0.65)*Math.pow(1/1.8,1.2))),borderColor:'#e84444',backgroundColor:'rgba(232,68,68,0.06)',fill:true,pointRadius:0,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Flight cycles (×10³)',color:'#5a6480',font:{size:10,family:'Space Mono'}},ticks:{color:'#5a6480',font:{family:'Space Mono',size:9},maxTicksLimit:7},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'#1a1f2e'}},y:{title:{display:true,text:'Residual strength (MPa)',color:'#5a6480',font:{size:10,family:'Space Mono'}},min:0,max:300,ticks:{color:'#5a6480',font:{family:'Space Mono',size:9}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'#1a1f2e'}}}}});
+const errs=Array.from({length:20},(_,i)=>i*0.6);
+new Chart($('nasaChart').getContext('2d'),{type:'line',data:{labels:errs,datasets:[{label:'Nominal Vf',data:errs.map(()=>180),borderColor:'#4d9fff',borderDash:[5,3],pointRadius:0,borderWidth:1.5,backgroundColor:'transparent'},{label:'True Vf (FRVF)',data:errs.map(e=>180*(1-e/100)),borderColor:'#3ddc97',pointRadius:0,borderWidth:2.5,backgroundColor:'rgba(61,220,151,0.08)',fill:'+1'},{label:'True Vf (LF)',data:errs.map(e=>180*(1-e/100*1.6)),borderColor:'#e84444',pointRadius:0,borderWidth:2,borderDash:[3,2],backgroundColor:'rgba(232,68,68,0.06)',fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Damping identification error (%)',color:'#5a6480',font:{size:10,family:'Space Mono'}},ticks:{color:'#5a6480',font:{family:'Space Mono',size:9}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'#1a1f2e'}},y:{title:{display:true,text:'True flutter speed (m/s)',color:'#5a6480',font:{size:10,family:'Space Mono'}},min:140,max:190,ticks:{color:'#5a6480',font:{family:'Space Mono',size:9}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'#1a1f2e'}}}}});
+const cgP=Array.from({length:30},(_,i)=>0.15+i*0.012);
+new Chart($('f16Chart').getContext('2d'),{type:'line',data:{labels:cgP.map(v=>v.toFixed(3)),datasets:[{label:'SM (SAS-on)',data:cgP.map(cg=>(-(-1.5)/3.8)-cg),borderColor:'#4d9fff',pointRadius:0,borderWidth:2.5,backgroundColor:'rgba(77,159,255,0.07)',fill:true},{label:'SM=0',data:cgP.map(()=>0),borderColor:'#e84444',borderDash:[5,3],pointRadius:0,borderWidth:1.5,backgroundColor:'transparent'},{label:'FBW limit',data:cgP.map(()=>-0.02),borderColor:'#f5a623',borderDash:[3,2],pointRadius:0,borderWidth:1.5,backgroundColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'CG position x_cg/c̄',color:'#5a6480',font:{size:10,family:'Space Mono'}},ticks:{color:'#5a6480',font:{family:'Space Mono',size:9},maxTicksLimit:7},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'#1a1f2e'}},y:{title:{display:true,text:'Static margin SM',color:'#5a6480',font:{size:10,family:'Space Mono'}},min:-0.15,max:0.25,ticks:{color:'#5a6480',font:{family:'Space Mono',size:9}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'#1a1f2e'}}}}});
+
+/* INIT */
+renderTable();calculate();calcCFRP();runBOSOR();updateAloha();updateNasa();updateF16();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =========================================================
+   MODULE 4 — 3D BUCKLING (Three.js)
+   ========================================================= */
+let threeRenderer,threeScene,threeCamera,threeMesh,threeFrame,threeImpMesh;
+let isDragging=false,prevMouse={x:0,y:0},rotX=0.3,rotY=0.4,camDist=4;
+let currentStruct='cylinder',bucklePhase=0,buckleTarget=0;
+
+function init3D(){
+  // Handled by the robust tab-click initialiser above — this is kept as a safe no-op
+  if(threeRenderer)return; // already initialised
+  // If called directly, just trigger update3D which will build geometry if renderer exists
+}
+
+function build3DStructure(struct,loadPct,impPct,thickVal){
+  // Remove old meshes
+  [threeMesh,threeImpMesh].forEach(m=>{if(m)threeScene.remove(m)});
+  threeScene.children.filter(c=>c.userData.isStruct).forEach(c=>threeScene.remove(c));
+
+  const ratio=loadPct/100,buckled=ratio>=1.0,nearBuckle=ratio>0.85;
+  const impAmp=impPct/100*0.18;
+  const t=thickVal/100;
+
+  if(struct==='cylinder'){
+    const segs=64,hSegs=40,R=0.7,H=2.8;
+    const geo=new THREE.CylinderGeometry(R,R,H,segs,hSegs,false);
+    const pos=geo.attributes.position;
+    const buckleMode=3; // circumferential wave number
+    const axialModes=2;
+    for(let i=0;i<pos.count;i++){
+      const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
+      const theta=Math.atan2(z,x);
+      const yNorm=(y+H/2)/H; // 0..1
+      // Imperfection: small surface dimples even before buckling
+      const imp=impAmp*Math.sin(buckleMode*theta)*Math.sin(Math.PI*yNorm);
+      // Buckling deformation grows rapidly past P_cr
+      const buckleAmp=buckled?0.28*Math.pow(ratio-0.95,0.5):nearBuckle?0.04*(ratio-0.85)*10:0;
+      const deform=buckleAmp*Math.sin(buckleMode*theta)*Math.sin(axialModes*Math.PI*yNorm);
+      // Axial compression
+      const compress=buckled?0.18*Math.pow(ratio-0.95,0.4):ratio*0.06;
+      const radDelta=imp+deform;
+      const newR=Math.sqrt((x+radDelta*Math.cos(theta))**2+(z+radDelta*Math.sin(theta))**2);
+      pos.setXYZ(i,
+        (x+radDelta*Math.cos(theta)),
+        y*(1-compress),
+        (z+radDelta*Math.sin(theta)));
+    }
+    pos.needsUpdate=true;geo.computeVertexNormals();
+    const col=buckled?0xe84444:nearBuckle?0xf5a623:0x4d9fff;
+    const mat=new THREE.MeshPhongMaterial({color:col,wireframe:false,transparent:true,opacity:0.82,side:THREE.DoubleSide,shininess:60});
+    threeMesh=new THREE.Mesh(geo,mat);threeMesh.userData.isStruct=true;threeScene.add(threeMesh);
+    // Wireframe overlay
+    const wmat=new THREE.MeshBasicMaterial({color:buckled?0xff6666:0x1a3a5c,wireframe:true,transparent:true,opacity:0.12});
+    const wmesh=new THREE.Mesh(geo.clone(),wmat);wmesh.userData.isStruct=true;threeScene.add(wmesh);
+    // End caps
+    const capGeo=new THREE.CircleGeometry(R,segs);
+    const capMat=new THREE.MeshPhongMaterial({color:buckled?0xcc2222:0x1a5a9f,side:THREE.DoubleSide});
+    const capT=new THREE.Mesh(capGeo,capMat);capT.rotation.x=Math.PI/2;capT.position.y=H/2*(1-ratio*0.06);capT.userData.isStruct=true;threeScene.add(capT);
+    const capB=new THREE.Mesh(capGeo,capMat);capB.rotation.x=-Math.PI/2;capB.position.y=-H/2*(1-ratio*0.06);capB.userData.isStruct=true;threeScene.add(capB);
+    // Load arrows
+    addLoadArrows(H,buckled,ratio);
+  } else if(struct==='column'){
+    const segs=16,hSegs=30,R=0.12,H=2.8;
+    const geo=new THREE.CylinderGeometry(R,R,H,segs,hSegs);
+    const pos=geo.attributes.position;
+    const buckleAmp=buckled?0.35*Math.pow(ratio-0.95,0.5):nearBuckle?0.04*(ratio-0.85)*10:0;
+    const compress=Math.min(0.25,buckled?0.2*Math.pow(ratio-0.95,0.4):ratio*0.04);
+    for(let i=0;i<pos.count;i++){
+      const x=pos.getX(i),y=pos.getY(i);
+      const yNorm=(y+H/2)/H;
+      const imp2=impAmp*0.5*Math.sin(Math.PI*yNorm);
+      const lat=buckleAmp*Math.sin(Math.PI*yNorm)+imp2;
+      pos.setXYZ(i,x+lat,y*(1-compress),pos.getZ(i));
+    }
+    pos.needsUpdate=true;geo.computeVertexNormals();
+    const col=buckled?0xe84444:nearBuckle?0xf5a623:0x3ddc97;
+    const mat=new THREE.MeshPhongMaterial({color:col,shininess:80,transparent:true,opacity:0.9});
+    threeMesh=new THREE.Mesh(geo,mat);threeMesh.userData.isStruct=true;threeScene.add(threeMesh);
+    addLoadArrows(H,buckled,ratio);
+  } else {
+    // Flat panel
+    const W2=1.4,H2=2.0,seg=30;
+    const geo=new THREE.PlaneGeometry(W2,H2,seg,seg);
+    const pos=geo.attributes.position;
+    const buckleAmp=buckled?0.22*Math.pow(ratio-0.95,0.5):nearBuckle?0.025*(ratio-0.85)*10:0;
+    const m=2,n=1; // half-waves
+    for(let i=0;i<pos.count;i++){
+      const x=pos.getX(i),y=pos.getY(i);
+      const xn=(x+W2/2)/W2,yn=(y+H2/2)/H2;
+      const imp3=impAmp*0.4*Math.sin(Math.PI*xn)*Math.sin(Math.PI*yn);
+      const def=buckleAmp*Math.sin(m*Math.PI*xn)*Math.sin(n*Math.PI*yn);
+      pos.setZ(i,imp3+def);
+    }
+    pos.needsUpdate=true;geo.computeVertexNormals();
+    const col=buckled?0xe84444:nearBuckle?0xf5a623:0xc07fff;
+    const mat=new THREE.MeshPhongMaterial({color:col,side:THREE.DoubleSide,shininess:60,transparent:true,opacity:0.88});
+    threeMesh=new THREE.Mesh(geo,mat);threeMesh.userData.isStruct=true;threeScene.add(threeMesh);
+    const wmat=new THREE.MeshBasicMaterial({color:0x2a1a4a,wireframe:true,transparent:true,opacity:0.15});
+    const wm=new THREE.Mesh(geo.clone(),wmat);wm.userData.isStruct=true;threeScene.add(wm);
+  }
+
+  // Stress colour overlay particles if buckled
+  if(buckled){
+    const pts=[];const cols=[];
+    for(let i=0;i<200;i++){
+      const theta=Math.random()*Math.PI*2,y=(Math.random()-0.5)*2.5;
+      const R2=0.72+Math.random()*0.05;
+      pts.push(R2*Math.cos(theta),y,R2*Math.sin(theta));
+      const hot=Math.random();cols.push(1,hot*0.2,0);
+    }
+    const pGeo=new THREE.BufferGeometry();
+    pGeo.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+    pGeo.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
+    const pMat=new THREE.PointsMaterial({size:0.04,vertexColors:true,transparent:true,opacity:0.7});
+    const particles=new THREE.Points(pGeo,pMat);particles.userData.isStruct=true;threeScene.add(particles);
+  }
+}
+
+function addLoadArrows(H,buckled,ratio){
+  const col=buckled?0xe84444:0xf5a623;
+  const arrowL=new THREE.ArrowHelper(new THREE.Vector3(0,-1,0),new THREE.Vector3(0,H/2+0.6,0),0.5,col,0.12,0.08);
+  arrowL.userData.isStruct=true;threeScene.add(arrowL);
+  const arrowB=new THREE.ArrowHelper(new THREE.Vector3(0,1,0),new THREE.Vector3(0,-H/2-0.6,0),0.5,col,0.12,0.08);
+  arrowB.userData.isStruct=true;threeScene.add(arrowB);
+}
+
+function animate3D(){
+  if(!threeRenderer||!threeScene){return;}
+  threeFrame=requestAnimationFrame(animate3D);
+  threeScene.rotation.y=rotY;
+  threeScene.rotation.x=rotX;
+  threeCamera.position.setLength(camDist);
+  threeCamera.lookAt(0,0,0);
+  threeRenderer.render(threeScene,threeCamera);
+}
+
+function update3D(){
+  if(!threeRenderer||!threeScene){
+    // Renderer not ready yet — show a loading message in the canvas area
+    const canvas=$('three-canvas');
+    if(canvas){
+      const ctx=canvas.getContext('2d');
+      if(ctx){
+        canvas.width=canvas.offsetWidth||600;canvas.height=500;
+        ctx.fillStyle='#050608';ctx.fillRect(0,0,canvas.width,500);
+        ctx.font='13px Space Mono,monospace';ctx.fillStyle='rgba(245,166,35,0.7)';ctx.textAlign='center';
+        ctx.fillText('Click the tab again if the 3D view does not appear…',canvas.width/2,250);
+      }
+    }
+    return;
+  }
+  const struct=$('v3-struct').value;
+  const loadPct=+$('v3-load').value;
+  const impPct=+$('v3-imp').value;
+  const thickVal=+$('v3-thick').value;
+  const K=+$('v3-bc').value;
+  $('v3-load-v').textContent=loadPct+'%';
+  $('v3-imp-v').textContent=impPct+'%';
+  $('v3-thick-v').textContent=thickVal;
+  currentStruct=struct;
+  // KDF calc (cylinder approx)
+  const Rt=500/(thickVal+1);
+  const phi=(1/29.8)*Math.sqrt(Rt);
+  const KDF=+(1-0.901*(1-Math.exp(-phi))).toFixed(3);
+  const Pcr_approx=(0.6055*71.7e9*(thickVal/1000/0.7)*2*Math.PI*0.7*0.7/K/1000).toFixed(1);
+  const ratio=(loadPct/100).toFixed(2);
+  $('v3-pcr').textContent=Pcr_approx+' kN';
+  $('v3-ratio').textContent=ratio;$('v3-ratio').style.color=loadPct>=100?'#e84444':loadPct>=85?'#f5a623':'#3ddc97';
+  $('v3-kdf').textContent=KDF;
+  const buckled=loadPct>=100;
+  $('v3-status').textContent=buckled?'BUCKLED':loadPct>=85?'PRE-BUCKLING':'ELASTIC';
+  $('v3-status').style.color=buckled?'#e84444':loadPct>=85?'#f5a623':'#3ddc97';
+  $('v3-mode-label').textContent='MODE: '+(buckled?'POST-BUCKLE':loadPct>=85?'PRE-BUCKLE':'ELASTIC');
+  $('v3-mode-label').style.color=buckled?'#e84444':loadPct>=85?'#f5a623':'var(--cyan)';
+  $('v3-desc').textContent=buckled?`BUCKLED — Load has exceeded KDF-corrected P_cr. The structure has snapped to a buckled mode with ${Math.round(Math.abs(1-KDF)*100)}% capacity reduction from imperfections. This is the KDF in action: classical theory predicted a higher P_cr but real imperfections caused earlier collapse.`:loadPct>=85?`PRE-BUCKLING ZONE — Load is within the knockdown band. Imperfections are visible on the surface. Structure may collapse suddenly with only a small additional load increment. This is why KDF design margins exist.`:`ELASTIC REGIME — Structure is carrying load within the elastic range. Surface imperfections (amplitude ${impPct}%) cause slight deformation but no instability yet.`;
+  build3DStructure(struct,loadPct,impPct,thickVal);
+}
+
+/* =========================================================
+   MODULE 4 — CRACK PROPAGATION (Canvas 2D)
+   ========================================================= */
+const cpCanvas=$('crack-canvas');
+const cpCtx=cpCanvas.getContext('2d');
+let cpRivets=[],cpCracks=[],cpAnimRunning=false,cpAnimFrame=null;
+const CP_W=600,CP_H=500;
+
+function initCrackCanvas(){
+  cpCanvas.width=CP_W;cpCanvas.height=CP_H;
+  cpCanvas.style.height=CP_H+'px';
+  // Define rivet positions along S-10L lap joint rows
+  cpRivets=[];
+  // Two rows of rivets (lap joint)
+  const rows=[{y:CP_H*0.38,label:'Stringer S-10L Row A'},{y:CP_H*0.52,label:'Row B'}];
+  const nRivets=18,margin=50;
+  rows.forEach((row,ri)=>{
+    for(let i=0;i<nRivets;i++){
+      const x=margin+(CP_W-2*margin)/(nRivets-1)*i;
+      cpRivets.push({x,y:row.y,row:ri,id:ri*nRivets+i,cracked:false,crackedAt:0,size:5+Math.random()*2});
+    }
+  });
+  drawCracks(0,1,8.6,0.6);
+}
+
+function crackThreshold(cor,prs,ins){
+  // base threshold in kcycles — lower = crack sooner
+  return Math.max(2,(35/(cor*0.8))*(8.6/prs)*(0.4+ins*0.6));
+}
+
+function updateCracks(){
+  const cyc=+$('cp-cyc').value,cor=+$('cp-cor').value,prs=+$('cp-prs').value,ins=+$('cp-ins').value;
+  $('cp-cyc-v').textContent=cyc.toFixed(1)+'k';
+  $('cp-cor-v').textContent=cor.toFixed(2);
+  $('cp-prs-v').textContent=prs.toFixed(1);
+  $('cp-ins-v').textContent=ins.toFixed(2);
+  drawCracks(cyc,cor,prs,ins);
+}
+
+function drawCracks(cyc,cor,prs,ins){
+  cpCtx.clearRect(0,0,CP_W,CP_H);
+  // Background — fuselage skin colour
+  const skinGrad=cpCtx.createLinearGradient(0,0,0,CP_H);
+  skinGrad.addColorStop(0,'#0a0d14');skinGrad.addColorStop(1,'#07090f');
+  cpCtx.fillStyle=skinGrad;cpCtx.fillRect(0,0,CP_W,CP_H);
+
+  // Draw fuselage skin layers
+  const rowA=CP_H*0.38,rowB=CP_H*0.52;
+  // Overlap zone
+  cpCtx.fillStyle='rgba(77,159,255,0.04)';
+  cpCtx.fillRect(30,rowA-22,CP_W-60,rowB-rowA+44);
+  cpCtx.strokeStyle='rgba(77,159,255,0.15)';cpCtx.lineWidth=1;
+  cpCtx.strokeRect(30,rowA-22,CP_W-60,rowB-rowA+44);
+
+  // Label
+  cpCtx.font='9px Space Mono,monospace';cpCtx.fillStyle='rgba(77,159,255,0.5)';
+  cpCtx.fillText('LAP JOINT S-10L — OVERLAP ZONE',36,rowA-28);
+
+  // Pressure indicator
+  const prsNorm=(prs-5)/7;
+  cpCtx.font='9px Space Mono,monospace';cpCtx.fillStyle='rgba(245,166,35,0.6)';
+  cpCtx.fillText(`ΔP = ${prs.toFixed(1)} psi  ·  Hoop stress → ${(prs*6.9/0.04).toFixed(0)} Pa/m`,36,CP_H*0.12);
+
+  // Draw cycle counter
+  cpCtx.font='bold 28px Space Mono,monospace';
+  const cycCol=cyc>75?'#e84444':cyc>40?'#f5a623':'#3ddc97';
+  cpCtx.fillStyle=cycCol;
+  cpCtx.fillText(cyc.toFixed(1)+'k cycles',36,CP_H*0.22);
+  cpCtx.font='9px Space Mono,monospace';cpCtx.fillStyle='rgba(255,255,255,0.3)';
+  cpCtx.fillText('DESIGN LIFE: 40k  ·  ALOHA ACCIDENT: 89.6k',36,CP_H*0.28);
+  // Design life bar
+  cpCtx.fillStyle='rgba(255,255,255,0.08)';cpCtx.fillRect(36,CP_H*0.30,CP_W-72,6);
+  cpCtx.fillStyle=cycCol;cpCtx.fillRect(36,CP_H*0.30,Math.min((CP_W-72)*cyc/100,CP_W-72),6);
+  // Design life marker
+  cpCtx.strokeStyle='rgba(61,220,151,0.6)';cpCtx.lineWidth=1.5;cpCtx.setLineDash([3,3]);
+  const dlx=36+(CP_W-72)*40/100;
+  cpCtx.beginPath();cpCtx.moveTo(dlx,CP_H*0.29);cpCtx.lineTo(dlx,CP_H*0.32);cpCtx.stroke();
+  cpCtx.setLineDash([]);
+  cpCtx.font='8px Space Mono,monospace';cpCtx.fillStyle='rgba(61,220,151,0.6)';cpCtx.fillText('40k',dlx-8,CP_H*0.285);
+
+  // Compute crack state
+  const thr=crackThreshold(cor,prs,ins);
+  let nCracked=0,clusters=0,linkedSegs=[];
+  cpRivets.forEach(r=>{
+    const scatter=0.85+Math.random()*0.0001; // deterministic per rivet
+    const localThr=thr*(0.6+r.id*0.04%0.8);
+    r.cracked=cyc>localThr;
+    if(r.cracked)nCracked++;
+  });
+  // Link cracks between adjacent rivets in same row
+  const nRivets=18;
+  for(let ri=0;ri<2;ri++){
+    let seg=[];
+    for(let i=0;i<nRivets;i++){
+      const rv=cpRivets[ri*nRivets+i];
+      if(rv.cracked){seg.push(rv)}
+      else{if(seg.length>=2){linkedSegs.push([...seg]);clusters++}seg=[]}
+    }
+    if(seg.length>=2){linkedSegs.push([...seg]);clusters++}
+  }
+  // Cross-row linking
+  let crossLinked=[];
+  for(let i=0;i<nRivets;i++){
+    if(cpRivets[i].cracked&&cpRivets[nRivets+i].cracked)crossLinked.push(i);
+  }
+
+  // Draw crack paths between linked rivets
+  linkedSegs.forEach(seg=>{
+    if(seg.length<2)return;
+    cpCtx.beginPath();cpCtx.moveTo(seg[0].x,seg[0].y);
+    for(let i=1;i<seg.length;i++){
+      // Jagged crack path
+      const mx=(seg[i-1].x+seg[i].x)/2+((Math.random()-0.5)*8);
+      const my=(seg[i-1].y+seg[i].y)/2+((Math.random()-0.5)*14);
+      cpCtx.quadraticCurveTo(mx,my,seg[i].x,seg[i].y);
+    }
+    const grad=cpCtx.createLinearGradient(seg[0].x,seg[0].y,seg[seg.length-1].x,seg[seg.length-1].y);
+    grad.addColorStop(0,'rgba(232,68,68,0.9)');grad.addColorStop(1,'rgba(255,120,0,0.7)');
+    cpCtx.strokeStyle=grad;cpCtx.lineWidth=2+clusters*0.3;cpCtx.stroke();
+    // Glow
+    cpCtx.shadowBlur=8;cpCtx.shadowColor='rgba(232,68,68,0.5)';cpCtx.stroke();cpCtx.shadowBlur=0;
+  });
+
+  // Cross-row cracks
+  crossLinked.forEach(i=>{
+    const r1=cpRivets[i],r2=cpRivets[nRivets+i];
+    cpCtx.beginPath();cpCtx.moveTo(r1.x,r1.y);
+    cpCtx.quadraticCurveTo(r1.x+(Math.random()-0.5)*12,(r1.y+r2.y)/2,r2.x,r2.y);
+    cpCtx.strokeStyle='rgba(255,100,0,0.8)';cpCtx.lineWidth=1.5;cpCtx.stroke();
+  });
+
+  // Draw rivets
+  cpRivets.forEach(r=>{
+    cpCtx.beginPath();cpCtx.arc(r.x,r.y,r.size,0,Math.PI*2);
+    if(r.cracked){
+      // Cracked rivet — red glow
+      const rg=cpCtx.createRadialGradient(r.x,r.y,0,r.x,r.y,r.size*2.5);
+      rg.addColorStop(0,'rgba(232,68,68,0.9)');rg.addColorStop(0.5,'rgba(232,68,68,0.3)');rg.addColorStop(1,'rgba(232,68,68,0)');
+      cpCtx.fillStyle=rg;cpCtx.arc(r.x,r.y,r.size*2.5,0,Math.PI*2);cpCtx.fill();
+      cpCtx.beginPath();cpCtx.arc(r.x,r.y,r.size,0,Math.PI*2);
+      cpCtx.fillStyle='#e84444';cpCtx.fill();
+      // Crack lines from rivet
+      for(let a=0;a<3;a++){
+        const ang=Math.random()*Math.PI*2,len=r.size+4+Math.random()*6;
+        cpCtx.beginPath();cpCtx.moveTo(r.x,r.y);cpCtx.lineTo(r.x+Math.cos(ang)*len,r.y+Math.sin(ang)*len);
+        cpCtx.strokeStyle='rgba(232,68,68,0.7)';cpCtx.lineWidth=1;cpCtx.stroke();
+      }
+    } else {
+      cpCtx.fillStyle='rgba(255,255,255,0.2)';cpCtx.fill();
+      cpCtx.strokeStyle='rgba(255,255,255,0.35)';cpCtx.lineWidth=1;cpCtx.stroke();
+    }
+  });
+
+  // Failure zone overlay
+  if(clusters>=3||nCracked>20){
+    const failAlpha=Math.min(0.35,(clusters-2)*0.08+(nCracked-20)*0.005);
+    cpCtx.fillStyle=`rgba(232,68,68,${failAlpha})`;
+    cpCtx.fillRect(30,rowA-25,CP_W-60,rowB-rowA+50);
+  }
+
+  // Status / MSD label
+  const res=alohaResidual(cyc,cor,0),app=prs*1.5+60,ms=res/app-1;
+  const msColor=ms>0.2?'#3ddc97':ms>0?'#f5a623':'#e84444';
+  $('cp-ncrack').textContent=nCracked;
+  $('cp-clusters').textContent=clusters;
+  $('cp-ms').textContent=(ms>=0?'+':'')+ms.toFixed(3);
+  $('cp-ms').style.color=msColor;
+
+  const statusBox=$('cp-status-box');
+  if(nCracked===0){statusBox.style.borderLeftColor='var(--border2)';statusBox.innerHTML='No cracks nucleated. Structure intact — within design life.'}
+  else if(clusters===0){statusBox.style.borderLeftColor='var(--amber)';statusBox.innerHTML=`<strong style="color:var(--amber)">${nCracked} crack(s) nucleated</strong> at rivet holes — but not yet linked. MSD (Multi-Site Damage) has begun. Inspection would detect this stage.`}
+  else if(ms>0){statusBox.style.borderLeftColor='var(--red)';statusBox.innerHTML=`<strong style="color:var(--red)">${clusters} linked crack cluster(s)</strong> — Multi-Site Damage (MSD) active. ${crossLinked.length} cross-row links. Residual MS = ${ms.toFixed(3)}. Structure still holding but margin critically reduced.`}
+  else{statusBox.style.borderLeftColor='var(--red)';statusBox.style.background='var(--redbg)';statusBox.innerHTML=`<strong style="color:var(--red)">⚠ STRUCTURAL FAILURE — MS = ${ms.toFixed(3)}</strong><br>This replicates the Aloha 243 accident conditions. Linked crack cluster at S-10L has caused residual strength to fall below applied hoop stress. Fatigue failure imminent.`}
+
+  // Legend bottom
+  cpCtx.font='9px Space Mono,monospace';
+  cpCtx.fillStyle=msColor;cpCtx.fillText(`MS = ${(ms>=0?'+':'')+ms.toFixed(3)}  |  Residual strength: ${res.toFixed(0)} MPa  |  Applied: ${app.toFixed(0)} MPa`,36,CP_H-14);
+}
+
+function runCrackAnimation(){
+  if(cpAnimRunning)return;
+  cpAnimRunning=true;
+  let step=0;const steps=200;
+  const targetCyc=89.6,targetCor=2.2;
+  const startCyc=+$('cp-cyc').value,startCor=+$('cp-cor').value;
+  $('cp-prs').value=8.6;$('cp-ins').value=0.25;setR($('cp-prs'));setR($('cp-ins'));
+  function tick(){
+    if(step>=steps){cpAnimRunning=false;return}
+    step++;
+    const t=step/steps;const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    const cyc=startCyc+(targetCyc-startCyc)*ease;
+    const cor=startCor+(targetCor-startCor)*ease;
+    $('cp-cyc').value=cyc;$('cp-cor').value=cor;
+    setR($('cp-cyc'));setR($('cp-cor'));
+    $('cp-cyc-v').textContent=cyc.toFixed(1)+'k';$('cp-cor-v').textContent=cor.toFixed(2);
+    drawCracks(cyc,cor,8.6,0.25);
+    cpAnimFrame=setTimeout(tick,25);
+  }
+  tick();
+}
+
+// Init both on load
+window.addEventListener('load',()=>{
+  // Don't init 3D on load — module is hidden, canvas has zero width.
+  // Will init when user clicks tab instead.
+
+  initCrackCanvas();updateCracks();
+});
+// Also init when tab is clicked
+document.querySelector('[onclick="switchModule(\'m4\',this)"]').addEventListener('click',()=>{
+  // Give the DOM time to show the module (display:block) before measuring canvas
+  setTimeout(()=>{
+    try{
+      // Init crack canvas first (no dependency)
+      if(!cpRivets||!cpRivets.length){initCrackCanvas();updateCracks();}
+
+      function tryInit3D(attempt){
+        if(typeof THREE==='undefined'){
+          if(attempt<20){setTimeout(()=>tryInit3D(attempt+1),200);}
+          else{console.error('Three.js failed to load after 4s');}
+          return;
+        }
+        const canvas=$('three-canvas');
+        // Force a real pixel width — fallback to 600 if still hidden
+        const W=canvas.offsetWidth||canvas.parentElement.offsetWidth||600;
+        if(!threeRenderer){
+          // Patch init to use measured width
+          threeRenderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+          threeRenderer.setSize(W,500,false);
+          threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+          threeRenderer.setClearColor(0x050608,1);
+          threeScene=new THREE.Scene();
+          threeCamera=new THREE.PerspectiveCamera(45,W/500,0.1,100);
+          threeCamera.position.set(0,0,camDist);
+          threeScene.add(new THREE.AmbientLight(0xffffff,0.3));
+          const dl=new THREE.DirectionalLight(0xffffff,0.9);dl.position.set(3,5,3);threeScene.add(dl);
+          const dl2=new THREE.DirectionalLight(0x4d9fff,0.4);dl2.position.set(-3,-2,-3);threeScene.add(dl2);
+          const dl3=new THREE.DirectionalLight(0xf5a623,0.2);dl3.position.set(0,3,-3);threeScene.add(dl3);
+          const grid=new THREE.GridHelper(6,20,0x1a1f2e,0x1a1f2e);grid.position.y=-1.5;threeScene.add(grid);
+          // Mouse controls
+          canvas.addEventListener('mousedown',e=>{isDragging=true;prevMouse={x:e.clientX,y:e.clientY};});
+          window.addEventListener('mouseup',()=>isDragging=false);
+          window.addEventListener('mousemove',e=>{
+            if(!isDragging)return;
+            rotY+=(e.clientX-prevMouse.x)*0.008;
+            rotX+=(e.clientY-prevMouse.y)*0.008;
+            rotX=Math.max(-1.2,Math.min(1.2,rotX));
+            prevMouse={x:e.clientX,y:e.clientY};
+          });
+          canvas.addEventListener('wheel',e=>{camDist=Math.max(2,Math.min(10,camDist+e.deltaY*0.01));e.preventDefault();},{passive:false});
+          // Touch controls
+          let lastTouch=null;
+          canvas.addEventListener('touchstart',e=>{lastTouch=e.touches[0];e.preventDefault();},{passive:false});
+          canvas.addEventListener('touchmove',e=>{
+            if(!lastTouch)return;
+            rotY+=(e.touches[0].clientX-lastTouch.clientX)*0.008;
+            rotX+=(e.touches[0].clientY-lastTouch.clientY)*0.008;
+            lastTouch=e.touches[0];e.preventDefault();
+          },{passive:false});
+          animate3D();
+        } else {
+          // Already initialised — just resize
+          const W2=canvas.offsetWidth||600;
+          threeRenderer.setSize(W2,500,false);
+          threeCamera.aspect=W2/500;
+          threeCamera.updateProjectionMatrix();
+        }
+        update3D();
+      }
+      tryInit3D(0);
+    } catch(e){console.error('3D init error:',e);}
+  },150);
+});
+</script>
+<script>
+/* =========================================================
+   MODULE 5 — AI DESIGN ASSISTANT
+   ========================================================= */
+const PRESETS={
+  bosor:'Analyse my BOSOR cylinder: R=1.85m, t=4mm, L=3m, Al 7075-T6, P_applied=500kN, pin-pin boundary conditions, 12 stiffeners. Is it safe? What is the KDF-corrected margin of safety and what would you recommend to improve robustness?',
+  aloha:'Explain why Aloha Airlines Flight 243 failed from a structural sensitivity perspective. Which parameters — flight cycles, corrosion, crack density, cabin pressure, inspection quality — were most critical, and how does the margin of safety respond to each? Reference the NTSB report.',
+  flutter:'My wing has GJ=5.2×10⁶ N·m², EI=8.5×10⁶ N·m², mass ratio μ=18, flying at 160 m/s. My ground vibration test has a damping identification error of 3%. According to the NASA NTRS flutter uncertainty study, am I operating safely? What is my true flutter index?',
+  cfrp:'My CFRP panel (200μm HGF pitch, 1% Vf) took a 3 Joule impact and was healed at 125°C. According to Bond et al. 2007 data, what percentage of strength was recovered? Is it airworthy? What configuration would give the best healing performance?',
+  f16:'My aircraft has Cm_α=−1.5 (FBW augmented), CL_α=3.8 /rad, CG at 32% chord, flying at Mach 0.8. Derivative uncertainty is ±2%. What is the static margin and what happens if the stability augmentation system fails? Reference F-16 certified limits.',
+  design:'Design me the most robust cylindrical shell for a rocket interstage that must carry 800kN axial load with minimum mass. Consider Al 7075-T6 vs Ti-6Al-4V vs CFRP. Apply NASA SP-8007 knockdown factors and provide margins of safety in Lockheed format.'
+};
+let aiConvHistory=[];
+
+function loadPreset(){
+  const v=$('ai-preset').value;
+  if(v&&PRESETS[v])$('ai-query').value=PRESETS[v];
+}
+
+async function runAI(){
+  const query=$('ai-query').value.trim();
+  if(!query)return;
+  const depth=$('ai-depth').value;
+  const btn=$('ai-btn');
+  btn.textContent='⏳ ANALYSING…';btn.style.opacity='0.6';btn.disabled=true;
+  $('ai-status').textContent='· streaming';
+  $('ai-response').textContent='';
+
+  const sysPrompt=`You are an expert aerospace structural engineer and consultant. You have deep knowledge of:
+- BOSOR buckling analysis (Bushnell 1976, Lockheed methodology)
+- NASA SP-8007 knockdown factors for cylindrical shells
+- Margin of Safety calculations in Lockheed/NASA format: MS = P_cr/P_applied - 1
+- CFRP self-healing using hollow glass fibres (Bond et al. 2007): 70μm HGF at 3% Vf restores ~89% flexural strength
+- Aerospace software reliability (Prokop 2024): 85% of failures are erroneous output, 40% involve missing code
+- Aloha Airlines Flight 243 (NTSB AAR-89/03): fatigue at lap joint S-10L after 89,680 cycles
+- NASA Langley flutter uncertainty (NTRS-20100016275): 3-5% damping error shifts flutter speed by 3-5%
+- F-16 stability: SM = −2% to −5%, FBW limit at −2%, aft CG limit at 35% chord
+
+${depth==='quick'?'Give a concise 2-3 paragraph assessment.':depth==='formal'?'Provide a formal engineering report with: Executive Summary, Technical Analysis, Calculated Margins, Sensitivity Assessment, Recommendations, and References.':'Give a detailed technical analysis with equations where relevant, covering the failure mechanism, sensitivity analysis, margin calculations, and specific redesign recommendations.'}
+
+Always be quantitative. Reference specific data from the project (NTSB, NASA, Bond et al., Prokop) where relevant. Format your response clearly with sections if detailed.`;
+
+  const messages=[...aiConvHistory,{role:'user',content:query}];
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sysPrompt,messages})
+    });
+    const data=await resp.json();
+    const text=data.content?.map(c=>c.text||'').join('')||'No response received.';
+    $('ai-response').textContent=text;
+    $('ai-status').textContent='· complete';
+    // Store history
+    aiConvHistory.push({role:'user',content:query},{role:'assistant',content:text});
+    // Add to history UI
+    const histDiv=$('ai-history');
+    const entry=document.createElement('div');
+    entry.style.cssText='border:1px solid var(--border);padding:1rem;background:var(--bg2)';
+    entry.innerHTML=`<div style="font-family:var(--mono);font-size:9px;color:var(--amber);margin-bottom:.4rem;letter-spacing:.1em">Q: ${query.slice(0,100)}${query.length>100?'…':''}</div><div style="font-size:11px;color:var(--text2);line-height:1.8;white-space:pre-wrap">${text}</div>`;
+    histDiv.insertBefore(entry,histDiv.firstChild);
+  }catch(e){
+    $('ai-response').textContent='Error connecting to AI. Please check your connection.\n\n'+e.message;
+    $('ai-status').textContent='· error';
+  }
+  btn.textContent='▶ RUN AI ANALYSIS';btn.style.opacity='1';btn.disabled=false;
+}
+
+function clearAIHistory(){aiConvHistory=[];$('ai-history').innerHTML='';$('ai-response').textContent='History cleared.';}
+
+/* =========================================================
+   MODULE 6 — FAILURE MODE MATRIX
+   ========================================================= */
+const FM_STRUCTS=['Column','Flat Panel','Cylinder Shell','Stiffened Panel','Ring Frame','Sandwich Panel'];
+const FM_LOADS=['Axial Compression','Bending','Torsion','External Pressure','Combined N+M','Thermal + Mech'];
+const FM_MODES=[
+  ['Euler buckling','Local plate buckling','Shell buckling','Panel flutter','Interactive buckling','Thermal buckling'],
+  ['Lateral-torsional','Local buckling','Ovalization','Elastic buckling','Beam-column','Creep buckling'],
+  ['Torsional buckling','Shear buckling','Torsional collapse','Ring collapse','Torsion-bending','Thermally-driven'],
+  ['Pressure buckling','Pressure + shear','Hydrostatic collapse','Pressure collapse','Lobe buckling','Pressure creep'],
+  ['Combined mode','Interaction failure','Combined buckling','Pressure-bend','Multi-mode','Thermal interact'],
+  ['Thermal bow','Thermal plate','Thermal shell','Thermal pressure','Thermal combined','Thermal fatigue']
+];
+const FM_BASE_MS=[
+  [0.65,0.45,0.55,0.80,0.40,0.30],
+  [0.50,0.35,0.60,0.55,0.30,0.25],
+  [0.70,0.50,0.40,0.60,0.35,0.20],
+  [0.55,0.40,0.65,0.45,0.25,0.15],
+  [0.45,0.30,0.50,0.35,0.20,0.10],
+  [0.60,0.45,0.55,0.50,0.30,0.20]
+];
+const FM_MAT={al:1.0,ti:1.35,cfrp:1.6,steel:0.95};
+const FM_HIST=[
+  ['Euler column: Mariner 1 launch vehicle strap, 1962','Plate buckling: Aloha 737 fuselage panel','Shell buckling: Atlas rocket inter-stage, 1961','Panel flutter: F-111 wing, 1969','Interactive: Saturn V S-IC stringer','Thermal bow: HST structure, 1990'],
+  ['Lateral-torsional: Apollo SLA panels','Local: DC-10 cargo door frame','Ovalization: submarine pressure hull','Elastic: OTEC pipeline','Beam-column: rocket truss','Creep: SR-71 titanium at high T'],
+  ['Torsional: missile fin, 1982','Shear: Comet 1 window corner','Torsional collapse: test article NTS-1','Ring collapse: submarine, 1963','Combined: Space Shuttle SRB joint','Thermal torsion: reentry vehicle'],
+  ['Pressure buckling: submarine hull design','Pressure+shear: deep-sea submersible','Hydrostatic: ALVIN sphere','Pressure collapse: Titan II tank','Lobe buckling: balloon film','Pressure creep: deep-sea riser'],
+  ['Combined: rocket nozzle extension','Interaction: aircraft longeron','Combined buckling: tank bottom','Pressure-bend: pipe elbow','Multi-mode: airframe joint','Thermal interact: TPS bracket'],
+  ['Thermal bow: boom shadowing','Thermal plate: heat shield','Thermal shell: reentry vehicle','Thermal pressure: propellant tank','Thermal combined: TPS panel','Thermal fatigue: Shuttle tile']
+];
+const FM_EQ=[
+  ['P_cr=π²EI/(KL)²','σ_cr=k·π²E·t²/[12(1-ν²)b²]','σ_cr=KDF·0.6055E·t/R','V_flutter=f(EI,GJ,μ)','P_cr·interaction','σ_thermal=EαΔT'],
+  ['M_cr=√(EI·GJ)·π/L','σ_cr=k·π²E·t²/b²','σ_cr=E·t²/√(3(1-ν²))R²','σ_cr=0.855E(t/R)²','P/P_e+M/M_e=1','σ_cr·thermal reduction'],
+  ['σ_cr=GJ·(π/L)²/A','τ_cr=k·π²E·t²/b²','M_cr=2π·E·t²·R','p_cr=2E(t/R)³','M+T interaction','Torsion-thermal'],
+  ['σ_cr=0.855E(t/R)²','p_cr=2E(t/R)³·n²','p_cr=2E(t/R)³','p_cr=2E/(1-ν²)(t/R)³','Rc+Rs+Rp≤1','p·thermal factor'],
+  ['Rc+Rs²+Rp²≤1','P/P_cr+M/M_cr≤1','R_N+R_M+R_T≤1','p/p_cr+M/M_cr≤1','ΣRᵢ≤1','ΣRᵢ·thermal'],
+  ['δ_thermal=αΔTL²/8h','σ=EαΔT','σ_cr·thermal','p_cr·ΔT reduction','Combined thermal','N_thermal·cycles']
+];
+
+let fmCanvas,fmCtx,fmW,fmH,fmCW,fmCH;
+function initMatrix(){
+  fmCanvas=$('fm-canvas');fmCtx=fmCanvas.getContext('2d');
+  fmCW=90;fmCH=56;const hdr=80,lhdr=110;
+  fmW=lhdr+FM_LOADS.length*fmCW+2;fmH=hdr+FM_STRUCTS.length*fmCH+2;
+  fmCanvas.width=fmW;fmCanvas.height=fmH;fmCanvas.style.width=fmW+'px';fmCanvas.style.height=fmH+'px';
+  fmCanvas.onclick=e=>{
+    const rect=fmCanvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    const col=Math.floor((mx-110)/fmCW),row=Math.floor((my-80)/fmCH);
+    if(col>=0&&col<FM_LOADS.length&&row>=0&&row<FM_STRUCTS.length)showFMDetail(row,col);
+  };
+  renderMatrix();
+}
+function msColor(ms){
+  if(ms>=0.5)return{bg:'rgba(61,220,151,0.25)',txt:'#3ddc97'};
+  if(ms>=0.2)return{bg:'rgba(61,220,151,0.12)',txt:'#7ddcb5'};
+  if(ms>=0.05)return{bg:'rgba(245,166,35,0.2)',txt:'#f5a623'};
+  if(ms>0)return{bg:'rgba(245,166,35,0.1)',txt:'#c88a10'};
+  if(ms>-0.2)return{bg:'rgba(232,68,68,0.2)',txt:'#e84444'};
+  return{bg:'rgba(232,68,68,0.4)',txt:'#ff2222'};
+}
+function renderMatrix(){
+  if(!fmCtx)return;
+  const load=+$('fm-load').value,matF=FM_MAT[$('fm-mat').value],sf=+$('fm-sf').value;
+  $('fm-load-v').textContent=load.toFixed(2)+'×';$('fm-sf-v').textContent=sf.toFixed(1);
+  fmCtx.clearRect(0,0,fmW,fmH);
+  fmCtx.fillStyle='#08090d';fmCtx.fillRect(0,0,fmW,fmH);
+  // Headers
+  fmCtx.font='bold 10px Space Mono,monospace';fmCtx.fillStyle='#f5a623';fmCtx.textAlign='center';
+  FM_LOADS.forEach((l,i)=>{
+    fmCtx.fillStyle='#1a1f2e';fmCtx.fillRect(110+i*fmCW,0,fmCW-1,78);
+    fmCtx.fillStyle='#9da5bc';fmCtx.font='9px Space Mono,monospace';
+    const words=l.split(' ');
+    words.forEach((w,wi)=>fmCtx.fillText(w,110+i*fmCW+fmCW/2,22+wi*14));
+  });
+  FM_STRUCTS.forEach((s,i)=>{
+    fmCtx.fillStyle='#0e1018';fmCtx.fillRect(0,80+i*fmCH,109,fmCH-1);
+    fmCtx.fillStyle='#9da5bc';fmCtx.font='9px Space Mono,monospace';fmCtx.textAlign='right';
+    const words=s.split(' ');
+    words.forEach((w,wi)=>fmCtx.fillText(w,106,80+i*fmCH+fmCH/2-4+wi*13));
+  });
+  // Cells
+  FM_STRUCTS.forEach((s,ri)=>{
+    FM_LOADS.forEach((l,ci)=>{
+      const ms_raw=FM_BASE_MS[ri][ci]*matF/load/sf;
+      const {bg,txt}=msColor(ms_raw);
+      const x=110+ci*fmCW,y=80+ri*fmCH;
+      fmCtx.fillStyle=bg;fmCtx.fillRect(x,y,fmCW-1,fmCH-1);
+      fmCtx.strokeStyle='rgba(255,255,255,0.04)';fmCtx.strokeRect(x,y,fmCW-1,fmCH-1);
+      fmCtx.fillStyle=txt;fmCtx.font='bold 11px Space Mono,monospace';fmCtx.textAlign='center';
+      fmCtx.fillText((ms_raw>=0?'+':'')+ms_raw.toFixed(3),x+fmCW/2,y+fmCH/2-4);
+      fmCtx.font='7px Space Mono,monospace';fmCtx.fillStyle='rgba(255,255,255,0.3)';
+      fmCtx.fillText(FM_MODES[ri][ci].slice(0,14),x+fmCW/2,y+fmCH/2+9);
+    });
+  });
+  fmCtx.font='bold 10px Space Mono,monospace';fmCtx.fillStyle='#5a6480';fmCtx.textAlign='left';
+  fmCtx.fillText('MARGIN OF SAFETY MATRIX',4,14);
+  fmCtx.font='8px Space Mono,monospace';fmCtx.fillStyle='#3a4060';
+  fmCtx.fillText('Load ×'+load.toFixed(1)+'  SF='+sf.toFixed(1)+'  Mat='+$('fm-mat').value.toUpperCase(),4,28);
+}
+function showFMDetail(ri,ci){
+  const load=+$('fm-load').value,matF=FM_MAT[$('fm-mat').value],sf=+$('fm-sf').value;
+  const ms=FM_BASE_MS[ri][ci]*matF/load/sf;
+  const col=ms>=0.2?'var(--green)':ms>=0?'var(--amber)':'var(--red)';
+  $('fm-detail').innerHTML=`
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--amber);text-transform:uppercase;margin-bottom:.5rem">${FM_STRUCTS[ri]} · ${FM_LOADS[ci]}</div>
+    <div style="font-size:14px;font-weight:700;color:${col};margin-bottom:.5rem">MS = ${(ms>=0?'+':'')+ms.toFixed(4)}</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:.3rem">Failure mode: <span style="color:var(--text)">${FM_MODES[ri][ci]}</span></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:.3rem">Governing equation: <span style="color:var(--cyan)">${FM_EQ[ri][ci]}</span></div>
+    <div style="font-size:11px;color:var(--text2);line-height:1.7;margin-top:.5rem">Historical example: ${FM_HIST[ri][ci]}</div>
+    <div style="margin-top:.75rem;font-family:var(--mono);font-size:10px;color:var(--text3)">${ms<0?'⚠ FAILURE — increase wall thickness, reduce load, or add stiffeners':ms<0.2?'⚡ MARGINAL — within knockdown uncertainty band. Apply NASA SP-8007 KDF':'✓ ADEQUATE — margin exceeds minimum 0.20 threshold'}</div>`;
+}
+
+/* =========================================================
+   MODULE 7 — EIGENVALUE TRACKER
+   ========================================================= */
+let evChart=null;
+const EV_HISTORY=[];
+function eigenvalues(struct,loadPct,impPct){
+  const p=loadPct/100,imp=impPct/100;
+  // 5 mode eigenvalues, each with different sensitivity
+  const modes=struct==='column'?[1,4,9,16,25]:struct==='cylinder'?[1,1.15,1.35,1.6,2.0]:[1,1.4,2.2,3.1,4.5];
+  return modes.map((m,i)=>{
+    const classical=m;
+    const kdf=1-imp*(0.3+i*0.08); // imperfection reduces each mode differently
+    const lambda=Math.max(0.01,kdf/Math.max(0.001,p));
+    return{mode:i+1,lambda:+lambda.toFixed(4),kdf:+kdf.toFixed(3),classical};
+  });
+}
+function updateEigen(){
+  const load=+$('ev-load').value,struct=$('ev-struct').value,imp=+$('ev-imp').value;
+  $('ev-load-v').textContent=load+'%';$('ev-imp-v').textContent=imp+'%';
+  const evs=eigenvalues(struct,load,imp);
+  // Table
+  const tbl=$('ev-table');
+  tbl.innerHTML='<tr style="border-bottom:1px solid var(--border2)"><th style="text-align:left;padding:.3rem .5rem;color:var(--text3);font-size:9px;letter-spacing:.1em">MODE</th><th style="text-align:right;padding:.3rem .5rem;color:var(--text3);font-size:9px">λ = P_cr/P</th><th style="text-align:right;padding:.3rem .5rem;color:var(--text3);font-size:9px">KDF</th><th style="text-align:right;padding:.3rem .5rem;color:var(--text3);font-size:9px">STATUS</th></tr>'+
+    evs.map(e=>{
+      const col=e.lambda>1.5?'#3ddc97':e.lambda>1?'#f5a623':'#e84444';
+      const st=e.lambda<=1?'UNSTABLE':e.lambda<=1.2?'MARGINAL':'STABLE';
+      return`<tr style="border-bottom:1px solid var(--border)"><td style="padding:.35rem .5rem;font-weight:700">Mode ${e.mode}</td><td style="text-align:right;color:${col};font-weight:700">${e.lambda.toFixed(4)}</td><td style="text-align:right;color:var(--blue)">${e.kdf.toFixed(3)}</td><td style="text-align:right;color:${col};font-size:10px">${st}</td></tr>`;
+    }).join('');
+  // Verdict
+  const firstUnstable=evs.find(e=>e.lambda<=1);
+  const vb=$('ev-verdict-box');
+  if(firstUnstable){
+    vb.style.borderLeftColor='var(--red)';vb.innerHTML=`<strong style="color:var(--red)">Mode ${firstUnstable.mode} UNSTABLE — λ = ${firstUnstable.lambda.toFixed(4)}</strong><br>The ${firstUnstable.mode===1?'first (lowest)':'higher'} buckling eigenvalue has crossed 1.0. The structure has bifurcated into an unstable equilibrium. This is the mathematical definition of buckling instability.`;
+  } else if(evs[0].lambda<1.3){
+    vb.style.borderLeftColor='var(--amber)';vb.innerHTML=`<strong style="color:var(--amber)">Mode 1 approaching — λ₁ = ${evs[0].lambda.toFixed(4)}</strong><br>Within the knockdown uncertainty band. Small additional load or imperfections could cause instability. Margin is insufficient for reliable aerospace design.`;
+  } else {
+    vb.style.borderLeftColor='var(--green)';vb.innerHTML=`<strong style="color:var(--green)">All modes stable — λ₁ = ${evs[0].lambda.toFixed(4)}</strong><br>Lowest eigenvalue well above 1.0. Structure has adequate reserve against buckling in all tracked modes.`;
+  }
+  // Chart — push new data point
+  EV_HISTORY.push({p:load,evs:evs.map(e=>e.lambda)});
+  if(EV_HISTORY.length>60)EV_HISTORY.shift();
+  const labels=EV_HISTORY.map(d=>d.p+'%');
+  const colors=['#3ddc97','#4d9fff','#f5a623','#c07fff','#e84444'];
+  const datasets=evs.map((e,i)=>({
+    label:`λ${e.mode}`,
+    data:EV_HISTORY.map(d=>d.evs[i]),
+    borderColor:colors[i],backgroundColor:'transparent',
+    pointRadius:0,borderWidth:i===0?2.5:1.5,tension:0.3,
+    borderDash:i===0?[]:[4,3]
+  }));
+  datasets.push({label:'λ=1 (instability)',data:EV_HISTORY.map(()=>1),borderColor:'rgba(232,68,68,0.5)',borderDash:[6,4],pointRadius:0,borderWidth:1.5,backgroundColor:'transparent'});
+  if(!evChart){
+    evChart=new Chart($('ev-chart').getContext('2d'),{type:'line',data:{labels,datasets},options:{...CD,plugins:{legend:{display:true,position:'right',labels:{font:{family:'Space Mono',size:8},color:'#9da5bc',boxWidth:12}}},scales:{...CD.scales,y:{...CD.scales.y,min:0,max:4,title:{display:true,text:'Eigenvalue λ = P_cr/P',color:'#5a6480',font:{size:9,family:'Space Mono'}}}}}});
+  } else {
+    evChart.data.labels=labels;evChart.data.datasets=datasets;evChart.update('none');
+  }
+  // Mode shape
+  drawModeShape(struct,load,imp,evs[0]);
+}
+function drawModeShape(struct,load,imp,ev){
+  const c=$('ev-shape'),ctx=c.getContext('2d');
+  const W=c.clientWidth||400,H=180;c.width=W;c.height=H;
+  ctx.fillStyle='#050608';ctx.fillRect(0,0,W,H);
+  const buckled=ev.lambda<=1,p=load/100,impA=imp/100;
+  ctx.strokeStyle=buckled?'#e84444':ev.lambda<1.3?'#f5a623':'#4d9fff';
+  ctx.lineWidth=2.5;ctx.shadowBlur=buckled?10:0;ctx.shadowColor='#e84444';
+  if(struct==='column'){
+    const amp=(buckled?0.18:impA*0.06+p*0.04)*W*0.3;
+    ctx.beginPath();
+    for(let i=0;i<=60;i++){const t=i/60,y=H*0.1+t*H*0.8,x=W/2+amp*Math.sin(Math.PI*t);ctx.lineTo(x,y);}
+    ctx.stroke();
+    // supports
+    ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(W/2-18,H*0.08);ctx.lineTo(W/2+18,H*0.08);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(W/2-18,H*0.92);ctx.lineTo(W/2+18,H*0.92);ctx.stroke();
+  } else if(struct==='cylinder'){
+    const cx=W/2,cy=H/2,rx=W*0.22,ry=H*0.35;
+    const amp=(buckled?0.12:impA*0.05+p*0.03)*rx*2;
+    const n=3;
+    ctx.beginPath();
+    for(let i=0;i<=120;i++){
+      const theta=i/120*Math.PI*2;
+      const r=rx+amp*Math.cos(n*theta)*(buckled?1:0.4);
+      ctx.lineTo(cx+r*Math.cos(theta),cy+ry*0.6*Math.sin(theta)*0.5+ry*0.35*Math.sin(theta));
+    }
+    ctx.closePath();ctx.stroke();
+    // height lines
+    ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
+    [-rx*0.6,0,rx*0.6].forEach(dx=>{ctx.beginPath();ctx.moveTo(cx+dx,cy-ry*0.8);ctx.lineTo(cx+dx,cy+ry*0.8);ctx.stroke()});
+  } else {
+    const px=W*0.1,py=H*0.15,pw=W*0.8,ph=H*0.7;
+    const amp=(buckled?0.14:impA*0.05+p*0.03)*ph;
+    const m=2,n2=1;
+    ctx.beginPath();
+    for(let i=0;i<=60;i++)for(let j=0;j<=1;j++){
+      const x=px+pw*i/60,y=py+ph*j;
+      const z=amp*Math.sin(m*Math.PI*i/60)*Math.sin(n2*Math.PI*(j?0.5:0));
+      if(i===0&&j===0)ctx.moveTo(x,y-z);else ctx.lineTo(x,y-z);
+    }
+    ctx.stroke();
+    // grid lines
+    ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=0.5;
+    [0.25,0.5,0.75].forEach(t=>{ctx.beginPath();ctx.moveTo(px+pw*t,py);ctx.lineTo(px+pw*t,py+ph);ctx.stroke()});
+  }
+  ctx.shadowBlur=0;
+  // label
+  ctx.font='9px Space Mono,monospace';ctx.fillStyle='rgba(255,255,255,0.35)';ctx.textAlign='left';
+  ctx.fillText(`Mode 1 shape · λ=${ev.lambda.toFixed(3)} · ${buckled?'POST-BUCKLE':p>0.7?'PRE-BUCKLE':'ELASTIC'}`,10,H-8);
+}
+
+/* =========================================================
+   MODULE 8 — SENSITIVITY DASHBOARD + MC STREAMING + HEAL TL
+   ========================================================= */
+function buildSensitivityIndex(){
+  const params=[
+    {name:'Aloha: Corrosion factor',case:'Fatigue MS',delta:0.058,source:'Case A'},
+    {name:'Aloha: Flight cycles',case:'Fatigue MS',delta:0.052,source:'Case A'},
+    {name:'BOSOR: Wall thickness t',case:'Buckling MS',delta:0.048,source:'Case B'},
+    {name:'Flutter: Torsional stiffness GJ',case:'Flutter FI',delta:0.044,source:'Case B-NASA'},
+    {name:'Flutter: Damping error δ_ζ',case:'Flutter FI',delta:-0.041,source:'NASA ATW'},
+    {name:'BOSOR: Applied load P',case:'Buckling MS',delta:-0.038,source:'Case B'},
+    {name:'F-16: CG position x_cg/c̄',case:'Static margin SM',delta:-0.035,source:'Case C'},
+    {name:'Aloha: Crack density',case:'Fatigue MS',delta:-0.032,source:'Case A'},
+    {name:'BOSOR: Column length L',case:'Buckling MS',delta:-0.029,source:'Case B'},
+    {name:'Flutter: Mass ratio μ',case:'Flutter FI',delta:0.025,source:'NASA ATW'},
+    {name:'F-16: Cm_α derivative',case:'Static margin SM',delta:0.022,source:'Case C'},
+    {name:'Aloha: Cabin pressure ΔP',case:'Fatigue MS',delta:-0.019,source:'Case A'},
+    {name:'BOSOR: KDF imperfection',case:'Buckling MS',delta:-0.016,source:'NASA SP-8007'},
+    {name:'F-16: Mach (NP shift)',case:'Static margin SM',delta:-0.013,source:'Case C'},
+    {name:'CFRP: Healing temperature',case:'Strength recovery',delta:0.011,source:'Bond 2007'},
+  ].sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  const mx=Math.abs(params[0].delta);
+  $('si-bars').innerHTML=params.map(p=>{
+    const pct=(Math.abs(p.delta)/mx*100).toFixed(1);
+    const col=p.delta>0?'#3ddc97':'#e84444';
+    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:.6rem">
+      <div style="min-width:240px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text2)">${p.name}</div>
+      <div style="flex:1;height:14px;background:var(--bg4);border:1px solid var(--border);overflow:hidden;border-radius:2px"><div style="height:100%;width:${pct}%;background:${col};transition:width .5s"></div></div>
+      <div style="min-width:55px;font-family:var(--mono);font-size:10px;font-weight:700;color:${col}">${p.delta>=0?'+':''}${p.delta.toFixed(3)}</div>
+      <div style="min-width:80px;font-family:var(--mono);font-size:9px;color:var(--text3)">${p.source}</div>
+    </div>`;
+  }).join('');
+}
+
+// MC Streaming
+let mcSamples=[],mcRunning=false,mcTimer=null,mcBins=30,mcMin=0,mcMax=0,mcFailThresh=0;
+function randn2(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function generateSample(caseType){
+  if(caseType==='bosor'){
+    const E=71.7e9*(1+0.03*randn2()),t=(4/1000)*(1+0.04*randn2()),R=1.85*(1+0.003*randn2()),L=3*(1+0.005*randn2()),P=500e3*(1+0.08*randn2());
+    const A=2*Math.PI*R*t,phi=(1/29.8)*Math.sqrt(R/t),KDF=1-0.901*(1-Math.exp(-phi));
+    const Pcr=KDF*0.6055*E*(t/R)*A;return Pcr/P-1;
+  } else if(caseType==='aloha'){
+    const cyc=89.68*(1+0.05*randn2()),cor=2.2*(1+0.1*randn2()),prs=8.6*(1+0.03*randn2());
+    const res=280*Math.max(0,1-(cyc/120)*0.65)*Math.pow(1/cor,1.2),app=prs*1.5+60;return res/app-1;
+  } else {
+    const gj=5.2e6*(1+0.1*randn2()),ei=8.5e6*(1+0.06*randn2()),mu=18*(1+0.05*randn2()),de=3*(1+0.15*randn2());
+    const b=(2*Math.sqrt(gj/(0.45*2000*12.25))/(2*Math.PI))*Math.sqrt(mu*gj/ei);
+    const Vf=Math.max(60,15+b*(1+0.01)*Math.sqrt(ei/1e7)*8);return 1-160/(Vf*(1-de/100));
+  }
+}
+function resetMC(){
+  if(mcTimer)clearTimeout(mcTimer);mcRunning=false;mcSamples=[];
+  $('mc-n').textContent='0';$('mc-pf').textContent='—';$('mc-mean').textContent='—';$('mc-beta').textContent='—';
+  const c=$('mc-stream-canvas'),ctx=c.getContext('2d');
+  ctx.fillStyle='#050608';ctx.fillRect(0,0,c.width,c.height);
+  $('mc-status-txt').textContent='Press STREAM to begin.';
+}
+function startMC(){
+  if(mcRunning)return;
+  resetMC();mcRunning=true;
+  const caseType=$('mc-case').value,speed=+$('mc-speed').value;
+  // Prime range
+  const primer=Array.from({length:20},()=>generateSample(caseType));
+  mcMin=Math.min(...primer)-0.1;mcMax=Math.max(...primer)+0.1;
+  mcFailThresh=caseType==='flutter'?0:0;
+  function tick(){
+    if(!mcRunning||mcSamples.length>=1000){mcRunning=false;$('mc-status-txt').textContent=`Complete — ${mcSamples.length} samples. β = ${($('mc-beta').textContent)}.`;return}
+    for(let i=0;i<3;i++)mcSamples.push(generateSample(caseType));
+    drawMCStream(caseType);
+    mcTimer=setTimeout(tick,speed);
+  }
+  tick();
+}
+function drawMCStream(caseType){
+  const c=$('mc-stream-canvas');const W=c.clientWidth||500,H=320;c.width=W;c.height=H;
+  const ctx=c.getContext('2d');ctx.fillStyle='#050608';ctx.fillRect(0,0,W,H);
+  if(mcSamples.length<2)return;
+  const bins=new Array(mcBins).fill(0);
+  const rng=mcMax-mcMin;
+  mcSamples.forEach(s=>{const idx=Math.max(0,Math.min(mcBins-1,Math.floor((s-mcMin)/rng*mcBins)));bins[idx]++});
+  const maxBin=Math.max(...bins,1);
+  const bw=(W-60)/mcBins,pad=40;
+  bins.forEach((b,i)=>{
+    const x=40+i*bw,bh=(b/maxBin)*(H-pad-20);
+    const binCenter=mcMin+rng*(i+0.5)/mcBins;
+    const failed=caseType==='flutter'?binCenter<0:binCenter<0;
+    const col=failed?'rgba(232,68,68,0.75)':'rgba(77,159,255,0.6)';
+    ctx.fillStyle=col;ctx.fillRect(x,H-pad-bh,bw-1,bh);
+    if(failed){ctx.fillStyle='rgba(232,68,68,0.15)';ctx.fillRect(x,H-pad-bh,bw-1,bh)}
+  });
+  // Zero line
+  const zx=40+(0-mcMin)/rng*(W-60);
+  ctx.strokeStyle='rgba(232,68,68,0.6)';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(zx,20);ctx.lineTo(zx,H-pad);ctx.stroke();ctx.setLineDash([]);
+  ctx.font='8px Space Mono,monospace';ctx.fillStyle='rgba(232,68,68,0.7)';ctx.textAlign='center';ctx.fillText('FAIL',zx,15);
+  // Axis labels
+  ctx.fillStyle='rgba(255,255,255,0.25)';ctx.textAlign='center';ctx.font='9px Space Mono,monospace';
+  [0,0.25,0.5,0.75,1].forEach(t=>{
+    const v=mcMin+rng*t;ctx.fillText(v.toFixed(2),40+t*(W-60),H-8);
+  });
+  // Stats
+  const n=mcSamples.length,mean=mcSamples.reduce((a,b)=>a+b,0)/n;
+  const sd=Math.sqrt(mcSamples.reduce((a,v)=>a+(v-mean)**2,0)/n);
+  const pf=(mcSamples.filter(v=>v<0).length/n*100).toFixed(2);
+  const beta=sd>0?(mean/sd).toFixed(2):'>10';
+  $('mc-n').textContent=n;
+  $('mc-pf').textContent=pf+'%';$('mc-pf').style.color=+pf>5?'#e84444':+pf>1?'#f5a623':'#3ddc97';
+  $('mc-mean').textContent=mean.toFixed(4);
+  $('mc-beta').textContent=beta;$('mc-beta').style.color=+beta>=4?'#3ddc97':+beta>=3?'#f5a623':'#e84444';
+  $('mc-status-txt').textContent=`Streaming… ${n}/1000 samples · ${pf}% failure · β = ${beta}`;
+}
+
+// Self-Healing Timeline
+let healTLFrame=null,healTLPhase=0,healTLRunning=false;
+const HEAL_PHASES=[
+  {label:'Pre-impact — pristine CFRP + HGF fibres intact',duration:40,strength:98},
+  {label:'Impact event — HGFs rupture, delamination crack forms',duration:30,strength:69},
+  {label:'Healing agent released — epoxy flows into crack network',duration:60,strength:69},
+  {label:'Infiltration — healing agent wicking through delamination',duration:80,strength:72},
+  {label:'Curing at 125°C — epoxy polymerising, crack bridging',duration:80,strength:80},
+  {label:'Full cure — crack closed, compressive load path restored',duration:40,strength:92}
+];
+let healTick=0,healPhaseIdx=0,healFlowParticles=[];
+
+function resetHealTimeline(){
+  if(healTLFrame)cancelAnimationFrame(healTLFrame);healTLRunning=false;healTick=0;healPhaseIdx=0;healFlowParticles=[];
+  $('heal-tl-label').textContent='Click ANIMATE HEALING to begin';
+  $('heal-strength-label').textContent='Strength: 69%';
+  const c=$('heal-tl-canvas'),ctx=c.getContext('2d');
+  ctx.fillStyle='#050608';ctx.fillRect(0,0,c.width,c.height);
+}
+function runHealTimeline(){
+  if(healTLRunning)return;
+  healTLRunning=true;healTick=0;healPhaseIdx=0;healFlowParticles=[];
+  animateHeal();
+}
+function animateHeal(){
+  if(!healTLRunning)return;
+  const c=$('heal-tl-canvas');const W=c.clientWidth||600,H=220;c.width=W;c.height=H;
+  const ctx=c.getContext('2d');
+  const phase=HEAL_PHASES[healPhaseIdx];
+  const t=healTick/phase.duration; // 0..1
+  ctx.fillStyle='#050608';ctx.fillRect(0,0,W,H);
+
+  // CFRP fibre background
+  const nFibres=16,fibH=H*0.55;
+  for(let i=0;i<nFibres;i++){
+    const fx=W*0.08+i*(W*0.84/(nFibres-1));
+    ctx.strokeStyle='rgba(77,159,255,0.18)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(fx,H*0.2);ctx.lineTo(fx,H*0.8);ctx.stroke();
+  }
+  // Matrix
+  ctx.fillStyle='rgba(20,23,32,0.6)';ctx.fillRect(W*0.08,H*0.2,W*0.84,H*0.6);
+
+  // Crack zone
+  const crackOpen=healPhaseIdx<4?1:Math.max(0,1-t*(healPhaseIdx>=4?1:0));
+  const crackW=W*0.5,crackX=W*0.25;
+  if(healPhaseIdx>=1){
+    const crackAlpha=healPhaseIdx>=5?Math.max(0,1-t):1;
+    ctx.fillStyle=`rgba(232,68,68,${crackAlpha*0.35})`;
+    const crackH=H*0.4*crackOpen;ctx.fillRect(crackX,H*0.3,crackW,crackH);
+    // Jagged crack edges
+    ctx.strokeStyle=`rgba(232,68,68,${crackAlpha*0.9})`;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(crackX,H*0.3);
+    for(let i=0;i<=20;i++){ctx.lineTo(crackX+(Math.sin(i*1.7)*6)+2,H*0.3+crackH*i/20)}
+    ctx.stroke();
+    ctx.beginPath();ctx.moveTo(crackX+crackW,H*0.3);
+    for(let i=0;i<=20;i++){ctx.lineTo(crackX+crackW-(Math.sin(i*2.1)*6)-2,H*0.3+crackH*i/20)}
+    ctx.stroke();
+  }
+
+  // HGF fibres (hollow glass fibres — purple)
+  const nHGF=5,hgfSpacing=crackW/(nHGF+1);
+  for(let i=0;i<nHGF;i++){
+    const hx=crackX+hgfSpacing*(i+1);
+    const ruptured=healPhaseIdx>=1;
+    const col=ruptured?'rgba(160,32,240,0.8)':'rgba(160,32,240,0.95)';
+    ctx.strokeStyle=col;ctx.lineWidth=3.5;
+    ctx.beginPath();ctx.moveTo(hx,H*0.15);ctx.lineTo(hx,ruptured?H*0.3+5:H*0.85);ctx.stroke();
+    if(!ruptured){ctx.beginPath();ctx.moveTo(hx,H*0.3);ctx.lineTo(hx,H*0.85);ctx.stroke()}
+    // Rupture point marker
+    if(ruptured){ctx.fillStyle='rgba(160,32,240,0.9)';ctx.beginPath();ctx.arc(hx,H*0.3+2,4,0,Math.PI*2);ctx.fill()}
+  }
+
+  // Healing agent flow particles
+  if(healPhaseIdx>=2&&healPhaseIdx<=4){
+    if(Math.random()<0.3){
+      healFlowParticles.push({
+        x:crackX+hgfSpacing*(Math.floor(Math.random()*nHGF)+1),
+        y:H*0.3,vx:(Math.random()-0.5)*1.5,vy:1.5+Math.random(),
+        life:1,col:`rgba(245,166,35,${0.7+Math.random()*0.3})`
+      });
+    }
+    healFlowParticles=healFlowParticles.filter(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.life-=0.015;
+      if(p.life<=0||p.y>H*0.7)return false;
+      ctx.beginPath();ctx.arc(p.x,p.y,3*p.life,0,Math.PI*2);ctx.fillStyle=p.col;ctx.fill();return true;
+    });
+  }
+
+  // Cured epoxy fill
+  if(healPhaseIdx>=4){
+    const fillH=H*0.4*t;
+    const grad=ctx.createLinearGradient(0,H*0.3,0,H*0.7);
+    grad.addColorStop(0,'rgba(61,220,151,0.15)');grad.addColorStop(1,'rgba(61,220,151,0.4)');
+    ctx.fillStyle=grad;ctx.fillRect(crackX+2,H*0.7-fillH,crackW-4,fillH);
+    ctx.strokeStyle='rgba(61,220,151,0.5)';ctx.lineWidth=1;
+    ctx.strokeRect(crackX+2,H*0.7-fillH,crackW-4,fillH);
+  }
+
+  // Strength bar at bottom
+  const tStrength=phase.strength;
+  const dispStrength=healPhaseIdx>0?Math.round(HEAL_PHASES[healPhaseIdx-1<0?0:healPhaseIdx-1].strength+(tStrength-HEAL_PHASES[Math.max(0,healPhaseIdx-1)].strength)*t):tStrength;
+  const sCol=dispStrength>=85?'#3ddc97':dispStrength>=75?'#f5a623':'#e84444';
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(W*0.08,H*0.88,W*0.84,12);
+  ctx.fillStyle=sCol;ctx.fillRect(W*0.08,H*0.88,W*0.84*dispStrength/100,12);
+  ctx.font='9px Space Mono,monospace';ctx.fillStyle=sCol;ctx.textAlign='right';
+  ctx.fillText(`Strength: ${dispStrength}%`,W*0.96,H*0.88+9);
+  ctx.fillStyle='rgba(255,255,255,0.2)';ctx.textAlign='left';
+  ctx.fillText('0%',W*0.06,H*0.88+9);ctx.fillText('100%',W*0.08+W*0.84+2,H*0.88+9);
+  $('heal-strength-label').textContent=`Strength: ${dispStrength}%`;
+  $('heal-strength-label').style.color=sCol;
+  $('heal-tl-label').textContent=`Phase ${healPhaseIdx+1}/6 — ${phase.label}`;
+
+  healTick++;
+  if(healTick>=phase.duration){
+    healTick=0;healPhaseIdx++;
+    if(healPhaseIdx>=HEAL_PHASES.length){healTLRunning=false;$('heal-tl-label').textContent='✓ Healing complete — 92% strength restored (Bond et al. 2007)';return}
+  }
+  healTLFrame=requestAnimationFrame(animateHeal);
+}
+
+// Init all modules on load
+window.addEventListener('DOMContentLoaded',()=>{
+  buildSensitivityIndex();
+});
+document.querySelector('[onclick="switchModule(\'m6\',this)"]').addEventListener('click',()=>setTimeout(()=>{if(!fmCtx)initMatrix();else renderMatrix()},80));
+document.querySelector('[onclick="switchModule(\'m7\',this)"]').addEventListener('click',()=>setTimeout(()=>{updateEigen()},80));
+document.querySelector('[onclick="switchModule(\'m8\',this)"]').addEventListener('click',()=>setTimeout(()=>{buildSensitivityIndex();resetMC()},80));
+</script>
+</body>
+</html>
